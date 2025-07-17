@@ -2,5 +2,5 @@
 font = "sans serif"
 
 [[theme.fontFaces]]
-family = "noto-sans-jp"
-url = "static/NotoSansJP-Regular.woff2"
+family = "Noto Sans JP"
+url = "static/NotoSansJP-Thin.woff2"
