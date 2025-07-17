@@ -238,25 +238,26 @@ def show_main_app():
 
             # 👥 担当チームフィルター
             if '担当チーム' in df_filtered.columns:
-                teams = sorted(df_filtered['担当チーム'].dropna().unique().tolist())  # ← 念のため .tolist() もつける
+                teams = sorted(df_filtered['担当チーム'].dropna().unique().tolist())  # ← list に変換しておく！
 
-                # 初期化：選択肢が変わったときにのみリセット
-                if (
-                    'selected_teams_all' not in st.session_state
-                    or st.session_state['selected_teams_all'] != teams
-                ):
-                    st.session_state['selected_teams'] = teams.copy()
-                    st.session_state['selected_teams_all'] = teams.copy()
+                # 現在のセッションの選択が存在しないチームを含んでいたらリセット
+                previous_selection = st.session_state.get("selected_teams", [])
 
-                # default を厳密にフィルタしておく
-                current_default = [
-                    t for t in st.session_state.get('selected_teams', []) if t in teams
-                ]
+                # 有効な選択肢だけに絞る
+                valid_selection = [t for t in previous_selection if t in teams]
 
+                # 選択肢が減って、全部消えた場合 → 全選択で初期化
+                if not valid_selection:
+                    valid_selection = teams.copy()
+
+                # セッションに保存（←ここで事前に更新）
+                st.session_state["selected_teams"] = valid_selection
+
+                # 表示（key指定でセッション管理）
                 st.multiselect(
                     get_localized_text("👥 担当チーム"),
-                    teams,
-                    default=current_default,  # ← 安全なリストだけを渡す
+                    options=teams,
+                    default=valid_selection,
                     key="selected_teams"
                 )
 
@@ -264,7 +265,6 @@ def show_main_app():
                     df_filtered = df_filtered[df_filtered['担当チーム'].isin(st.session_state['selected_teams'])]
                 else:
                     st.warning(get_localized_text("担当チームが選択されていません。全ての担当チームのデータが表示されます。"))
-
 
             if '実施日' in df_filtered.columns:
                 # dt.dateに変換されているため、そのまま使用
