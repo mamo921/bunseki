@@ -452,6 +452,8 @@ def show_main_app():
                 ax.set_ylabel(get_graph_text("カウント", "Count"), fontproperties=font_prop)
                 plt.xticks(fontproperties=font_prop)
                 plt.yticks(fontproperties=font_prop)
+
+                st.pyplot(fig)
                 
                 for label in ax.get_xticklabels():
                     label.set_fontproperties(font_prop)
