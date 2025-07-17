@@ -457,8 +457,8 @@ def show_main_app():
                 ax.set_ylabel(get_graph_text("カウント", "Count"), fontproperties=font_prop)
 
                 # ← 🔥 ここが重要！！🔥
-                plt.xticks(fontproperties=font_prop)
-                plt.yticks(fontproperties=font_prop)
+                ax.set_xticklabels(ax.get_xticklabels(), fontproperties=font_prop)
+                ax.set_yticklabels(ax.get_yticklabels(), fontproperties=font_prop)
 
                 # ここで fig を上書き
                 fig = ax.get_figure()
@@ -765,8 +765,8 @@ def show_main_app():
                     ax.set_title(get_graph_text(f"時間帯×曜日の{heat_metric}（{agg_method_display}）", f"{agg_method_display} of {heat_metric} by Time Slot x Weekday"), fontproperties=font_prop, fontsize=16)
                     ax.set_xlabel(get_graph_text("曜日", "Weekday"), fontproperties=font_prop, fontsize=12)
                     ax.set_ylabel(get_graph_text("時間帯スロット", "Time Slot"), fontproperties=font_prop, fontsize=12)
-                    plt.xticks(fontproperties=font_prop)
-                    plt.yticks(fontproperties=font_prop)
+                    ax.set_xticklabels(ax.get_xticklabels(), fontproperties=font_prop)
+                    ax.set_yticklabels(ax.get_yticklabels(), fontproperties=font_prop)
 
                     for label in ax.get_xticklabels():
                         label.set_fontproperties(font_prop)
@@ -971,8 +971,8 @@ def show_main_app():
                     ax.set_xlabel(get_graph_text("実施日", "Date"), fontproperties=font_prop, fontsize=12)
                     ax.set_ylabel(get_graph_text(f"{trend_metric} ({agg_period_display}平均)", f"{trend_metric} ({agg_period_display} Average)"), fontproperties=font_prop, fontsize=12)
                     ax.legend(prop=font_prop) # Use font_prop directly for legend
-                    plt.xticks(fontproperties=font_prop)
-                    plt.yticks(fontproperties=font_prop)
+                    ax.set_xticklabels(ax.get_xticklabels(), fontproperties=font_prop)
+                    ax.set_yticklabels(ax.get_yticklabels(), fontproperties=font_prop)
                     for label in ax.get_xticklabels():
                         label.set_fontproperties(font_prop)
                     for label in ax.get_yticklabels():
@@ -1057,8 +1057,8 @@ def show_main_app():
                     ax.set_title(get_graph_text(f"{rank_group}別 {rank_metric}のランキング", f"Ranking of {rank_metric} by {rank_group}"), fontproperties=font_prop, fontsize=16)
                     ax.set_xlabel(get_graph_text(f"{rank_metric} 平均値", f"{rank_metric} Mean Value"), fontproperties=font_prop, fontsize=12)
                     ax.set_ylabel(get_graph_text(rank_group, rank_group), fontproperties=font_prop, fontsize=12) # Group name is data, keep as is
-                    plt.xticks(fontproperties=font_prop)
-                    plt.yticks(fontproperties=font_prop)
+                    ax.set_xticklabels(ax.get_xticklabels(), fontproperties=font_prop)
+                    ax.set_yticklabels(ax.get_yticklabels(), fontproperties=font_prop)
 
                     for label in ax.get_xticklabels():
                         label.set_fontproperties(font_prop)
