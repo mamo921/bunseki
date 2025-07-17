@@ -81,8 +81,6 @@ def load_users_from_secrets():
 # ログインフォームの表示
 def login_form():
     st.subheader(get_localized_text("ログイン", "Login"))
-    st.write("使用中のフォント：", font_prop.get_name())
-
 
     user_data = load_users_from_secrets()
 
