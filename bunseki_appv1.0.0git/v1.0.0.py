@@ -11,6 +11,17 @@ import bcrypt
 import matplotlib.font_manager as fm # フォントマネージャーをインポート
 import os
 
+font_path = os.path.join(os.path.dirname(__file__), "static", "NotoSansJP-VariableFont_wght.otf")
+
+if os.path.exists(font_path):
+    font_prop = fm.FontProperties(fname=font_path)
+    plt.rcParams['font.family'] = font_prop.get_name()
+    japanese_font_available = True
+else:
+    font_prop = None
+    japanese_font_available = False
+    st.warning("日本語フォントが見つかりませんでした。グラフのラベルが文字化けする可能性があります。")
+
 # matplotlibのフォント設定
 plt.rcParams['axes.unicode_minus'] = False
 plt.rcParams['font.size'] = 10
