@@ -163,35 +163,34 @@ def main():
         password_input = st.sidebar.text_input("パスワード", type="password")
 
         if st.sidebar.button("ログイン"):
-            # --- ここから追加 ---
             st.write("デバッグ: 入力されたユーザー名:", username_input)
-            st.write("デバッグ: 入力されたパスワード（ハッシュ化前）:", password_input) # !!! 注意: デバッグ後必ず削除 !!!
-            # --- ここまで追加 ---
+            st.write("デバッグ: 入力されたパスワード（ハッシュ化前）:", password_input)
 
-            users = load_users_from_secrets() # secretsからユーザー情報をロード
-            user_found = False
-            for user in users:
-                # ユーザー名比較ログをここに！
-                st.write("デバッグ: ユーザー名比較", "user側:", user['username'], "| 入力:", username_input)
+            if not username_input or not password_input:
+                st.sidebar.warning("ユーザー名とパスワードを入力してください。")
+            else:
+                users = load_users_from_secrets()
+                user_found = False
 
-                if user['username'] == username_input:
-                    user_found = True
-                    password_match = verify_password(password_input, user['password_hash'])
+                for user in users:
+                    st.write("デバッグ: ユーザー名比較", "user側:", user['username'], "| 入力:", username_input)
 
-                    st.write("デバッグ: パスワード一致した？", password_match)
+                    if user['username'] == username_input:
+                        user_found = True
+                        password_match = verify_password(password_input, user['password_hash'])
+                        st.write("デバッグ: パスワード一致した？", password_match)
 
-                    if password_match:
-                        st.session_state.logged_in = True
-                        st.session_state.username = username_input
-                        st.sidebar.success(f"ようこそ、{username_input}さん！")
-                        st.experimental_rerun()
-                    else:
-                        st.sidebar.error("パスワードが間違っています。")
-                    break
+                        if password_match:
+                            st.session_state.logged_in = True
+                            st.session_state.username = username_input
+                            st.sidebar.success(f"ようこそ、{username_input}さん！")
+                            st.experimental_rerun()
+                        else:
+                            st.sidebar.error("パスワードが間違っています。")
+                        break
 
-
-            if not user_found:
-                st.sidebar.error("ユーザー名が見つかりません。")
+                if not user_found:
+                    st.sidebar.error("ユーザー名が見つかりません。")
 
             st.info("ログインするとアプリケーションの機能が利用できます。")
             return
