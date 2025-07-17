@@ -1045,7 +1045,7 @@ def show_main_app():
             else:
                 st.info("「曜日」または「参加者数」の列がありません。")
 
-            st.markdown("### � 宣伝・リアクションと参加者数の関係")
+            st.markdown("### 💡 宣伝・リアクションと参加者数の関係")
             
             corr_summary_text = []
             if '宣伝回数' in df.columns and '参加者数' in df.columns:
@@ -1079,9 +1079,8 @@ def main():
     # Streamlitのページ設定は一度だけ行う
     st.set_page_config(page_title="VRイベント分析ツール", layout="wide")
 
-    # セッションステートにlogged_inがなければ初期化
-    if "logged_in" not in st.session_state:
-        st.session_state["logged_in"] = False
+    # アプリケーション起動時に常にログアウト状態にする
+    st.session_state["logged_in"] = False
 
     if st.session_state.get("logged_in"):
         # ログイン済みの場合、ユーザー名を表示し、ログアウトボタンとメインアプリを表示
