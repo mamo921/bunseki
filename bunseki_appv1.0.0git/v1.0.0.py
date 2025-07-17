@@ -178,12 +178,15 @@ def main():
                 if user['username'] == username_input:
                     user_found = True
                     if verify_password(password_input, user['password_hash']):
+                        st.write("デバッグ: パスワード照合に成功")  # ←追加！
                         st.session_state.logged_in = True
                         st.session_state.username = username_input
                         st.sidebar.success(f"ようこそ、{username_input}さん！")
                         st.experimental_rerun()
                     else:
+                        st.write("デバッグ: パスワード照合に失敗")  # ←追加！
                         st.sidebar.error("パスワードが間違っています。")
+
                     break
             if not user_found:
                 st.sidebar.error("ユーザー名が見つかりません。")
