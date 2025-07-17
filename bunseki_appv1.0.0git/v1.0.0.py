@@ -106,10 +106,8 @@ class DataProcessor:
 
 # ユーザー情報をStreamlit secretsからロードする関数
 def load_users_from_secrets():
-    raw_users = st.secrets["users"]
     users = []
-    for key, user in raw_users.items():
-        # ここで user は dict {"username": ..., "password_hash": ...}
+    for _, user in st.secrets.users.items():
         users.append(user)
     return users
 
@@ -128,13 +126,16 @@ def main():
 
     if not st.session_state.logged_in:
         st.sidebar.header("ログイン")
-        username_input = st.sidebar.text_input("ユーザー名")
-        password_input = st.sidebar.text_input("パスワード", type="password")
+        st.sidebar.text_input("ユーザー名", key="username_input")
+        st.sidebar.text_input("パスワード", type="password", key="password_input")
+
+        username_input = st.session_state.get("username_input", "").strip().lower()
+        password_input = st.session_state.get("password_input", "")
+
 
         if st.sidebar.button("ログイン"):
-            # --- ここから追加 ---
             st.write("デバッグ: 入力されたユーザー名:", username_input)
-            st.write("デバッグ: 入力されたパスワード（ハッシュ化前）:", password_input) # !!! 注意: デバッグ後必ず削除 !!!
+            st.write("デバッグ: 入力されたパスワード（ハッシュ化前）:", password_input)
             # --- ここまで追加 ---
 
             users = load_users_from_secrets() # secretsからユーザー情報をロード
