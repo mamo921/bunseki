@@ -11,7 +11,7 @@ import bcrypt
 import matplotlib.font_manager as fm # フォントマネージャーをインポート
 
 # 相対パスで指定（Streamlit Cloudでも通る）
-font_path = r"bunseki_appv1.0.0git\static\NotoSansJP-Thin.woff2"
+font_path = "bunseki_appv1.0.0git/static/NotoSansJP-Thin.woff2"
 font_prop = fm.FontProperties(fname=font_path)
 
 plt.rcParams['font.family'] = font_prop.get_name()
