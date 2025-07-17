@@ -89,6 +89,15 @@ def login_form():
         if not found_user:
             st.error(get_localized_text("ユーザーが見つかりません。", "User not found."))
 
+def show_main_app():
+    df = st.session_state.get("current_data", None)
+    if df is None:
+        st.error("データが読み込まれていません。")
+        return
+
+    # 🔽 フィルター済みデータがあれば使う。なければ全体を使う
+    df_filtered = st.session_state.get("dfmain", df)
+
 # --- アプリ本体のクラスと関数 (v1.0.0.py からの移行) ---
 
 class SessionManager:
