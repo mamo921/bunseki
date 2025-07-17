@@ -449,22 +449,26 @@ def show_main_app():
                 value_counts = df_display[selected_col].value_counts()
 
                 fig, ax = plt.subplots()
-                ax = sns.countplot(x=selected_col, data=df_filtered, order=df_filtered[selected_col].value_counts().index)
+                sns.countplot(x=selected_col, data=df_filtered, order=df_filtered[selected_col].value_counts().index, ax=ax)
 
-                # グラフのタイトル・ラベル
+                # タイトル・軸ラベル
                 ax.set_title(get_graph_text(f"{selected_col}の値カウント", f"Value Counts of {selected_col}"), fontproperties=font_prop, **title_font)
                 ax.set_xlabel(get_graph_text(selected_col, selected_col), fontproperties=font_prop)
                 ax.set_ylabel(get_graph_text("カウント", "Count"), fontproperties=font_prop)
 
-                # ← 🔥 ここが重要！！🔥
-                ax.set_xticklabels(ax.get_xticklabels(), fontproperties=font_prop)
-                ax.set_yticklabels(ax.get_yticklabels(), fontproperties=font_prop)
+                # ✅ x軸のTickラベルを完全に再描画する
+                xtick_labels = [tick.get_text() for tick in ax.get_xticklabels()]
+                ax.set_xticks(range(len(xtick_labels)))
+                ax.set_xticklabels(xtick_labels, fontproperties=font_prop, rotation=45, ha='right')  # ← ← ← ここがキモ
 
-                # ここで fig を上書き
-                fig = ax.get_figure()
+                # y軸も念のため再設定（なくてもいいけど）
+                ytick_labels = [tick.get_text() for tick in ax.get_yticklabels()]
+                ax.set_yticks(ax.get_yticks())
+                ax.set_yticklabels(ytick_labels, fontproperties=font_prop)
 
                 # 表示
                 st.pyplot(fig)
+
 
                 for label in ax.get_xticklabels():
                     label.set_fontproperties(font_prop)
