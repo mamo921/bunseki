@@ -16,7 +16,7 @@ plt.rcParams['axes.unicode_minus'] = False
 plt.rcParams['font.size'] = 10
 
 # フォントファイルのパス
-font_path = "static/NotoSansJP-VariableFont_wght.ttf"
+font_path = "bunseki_appv1.0.0git/static/NotoSansJP-VariableFont_wght.ttf"
 
 # フォント読み込みチェック
 if os.path.exists(font_path):
