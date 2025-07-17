@@ -3,7 +3,7 @@ enableStaticServing = true
 
 [[theme.fontFaces]]
 family = "noto-sans-jp"
-url = "app/static/NotoSansJP-Regular.woff2"
+url = "https://fonts.gstatic.com/s/notosansjp/v52/-F61fjptAgt5VM-kVkqdyU8n3lvZwVs9FhI.woff2"
 weight = 400
 
 [theme]
