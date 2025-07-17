@@ -234,29 +234,26 @@ def show_main_app():
         if dfmain_for_sidebar is not None and not dfmain_for_sidebar.empty:
             df_filtered = dfmain_for_sidebar.copy()
 
+            # 👥 担当チームフィルター
             if '担当チーム' in df_filtered.columns:
                 teams = sorted(df_filtered['担当チーム'].dropna().unique())
                 
-                # selected_teams の初期値をセッションステートから取得、なければ全選択
-                initial_selected_teams = st.session_state.get('selected_teams')
-                # selected_teams がNoneの場合、全チームを選択状態にする
-                if initial_selected_teams is None:
-                    initial_selected_teams = teams
-                
-                selected_teams = st.multiselect(
+                # 最初だけ全選択
+                if st.session_state.get("selected_teams") is None:
+                    st.session_state["selected_teams"] = teams
+
+                st.multiselect(
                     get_localized_text("👥 担当チーム"), 
                     teams, 
-                    default=[t for t in st.session_state.get('selected_teams', teams) if t in teams], 
-                    key='selected_teams'  # ←これを追加！
+                    default=[t for t in st.session_state["selected_teams"] if t in teams],
+                    key="selected_teams"
                 )
-                st.session_state.selected_teams = selected_teams # セッションステートに選択を保存
 
-                # 担当チームが何も選択されていない場合の動作変更
-                if len(selected_teams) == 0:
-                    st.warning(get_localized_text("担当チームが選択されていません。全ての担当チームのデータが表示されます。"))
-                    # df_filtered はこのブロックに入る前の状態（dfmain_for_sidebar）のまま使用
+                # フィルター適用
+                if st.session_state["selected_teams"]:
+                    df_filtered = df_filtered[df_filtered['担当チーム'].isin(st.session_state["selected_teams"])]
                 else:
-                    df_filtered = df_filtered[df_filtered['担当チーム'].isin(selected_teams)]
+                    st.warning(get_localized_text("担当チームが選択されていません。全ての担当チームのデータが表示されます。"))
 
             if '実施日' in df_filtered.columns:
                 # dt.dateに変換されているため、そのまま使用
