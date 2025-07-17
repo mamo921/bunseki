@@ -11,13 +11,6 @@ import bcrypt
 import matplotlib.font_manager as fm # フォントマネージャーをインポート
 import os
 
-# 例：countplot 後に明示的に適用
-ax = sns.countplot(x=selected_col, data=df_filtered, order=df_filtered[selected_col].value_counts().index)
-
-# x軸のラベルにフォントを適用
-for label in ax.get_xticklabels():
-    label.set_fontproperties(font_prop)
-
 # matplotlibのフォント設定
 plt.rcParams['axes.unicode_minus'] = False
 plt.rcParams['font.size'] = 10
