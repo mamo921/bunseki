@@ -53,7 +53,7 @@ def get_localized_text(jp_text, en_text):
 
 # Helper function for graph localization (graphs switch to English if Japanese font not available)
 def get_graph_text(jp_text, en_text):
-    return en_text if not japanese_font_available else jp_text
+    return jp_text
 
 
 # ページ設定
@@ -463,9 +463,9 @@ def show_main_app():
                 value_counts.plot(kind='bar', ax=ax)
                 
                 title_font = {'fontfamily': plt.rcParams['font.family'], 'fontsize': 12}
-                ax.set_title(get_graph_text(f"{selected_col}の値カウント", f"Value Counts of {selected_col}"), fontproperties=font_prop, **title_font)
-                ax.set_xlabel(get_graph_text(selected_col, selected_col), fontproperties=font_prop)
-                ax.set_ylabel(get_graph_text("カウント", "Count"), fontproperties=font_prop)
+                ax.set_title(get_graph_text(f"{selected_col}の値カウント", f"Value Counts of {selected_col}", fontproperties=font_prop), fontproperties=font_prop, **title_font)
+                ax.set_xlabel(get_graph_text(selected_col, selected_col, fontproperties=font_prop), fontproperties=font_prop)
+                ax.set_ylabel(get_graph_text("カウント", "Count", fontproperties=font_prop), fontproperties=font_prop)
                 
                 for label in ax.get_xticklabels():
                     label.set_fontfamily(plt.rcParams['font.family'])
@@ -562,8 +562,8 @@ def show_main_app():
                                 with cols[i % 2]:
                                     fig, ax = plt.subplots(figsize=(8, 4))
                                     grouped_df[col_name_for_plot].plot(kind='bar', ax=ax)
-                                    ax.set_ylabel(get_graph_text(f"{target_num}の{metric_display_name}", f"{metric_display_name} of {target_num}"), fontfamily=plt.rcParams['font.family'])
-                                    ax.set_title(get_graph_text(f"{group_col}ごとの{target_num}（{metric_display_name}）", f"{metric_display_name} of {target_num} by {group_col}"), fontfamily=plt.rcParams['font.family'])
+                                    ax.set_ylabel(get_graph_text(f"{target_num}の{metric_display_name}", f"{metric_display_name} of {target_num}", fontproperties=font_prop), fontfamily=plt.rcParams['font.family'])
+                                    ax.set_title(get_graph_text(f"{group_col}ごとの{target_num}（{metric_display_name}）", f"{metric_display_name} of {target_num} by {group_col}", fontproperties=font_prop), fontfamily=plt.rcParams['font.family'])
                                     plt.xticks(rotation=45)
                                     plt.tight_layout()
                                     st.pyplot(fig)
@@ -643,8 +643,8 @@ def show_main_app():
 
                         fig, ax = plt.subplots(figsize=(10, 5))
                         cross_table.plot(kind='bar', ax=ax)
-                        ax.set_ylabel(get_graph_text(num_col, num_col), fontfamily=plt.rcParams['font.family']) # Column name is fine
-                        ax.set_title(get_graph_text(f"{col1} × {col2} の {agg_method_display}", f"{agg_method_display} of {num_col} by {col1} x {col2}"), fontfamily=plt.rcParams['font.family'])
+                        ax.set_ylabel(get_graph_text(num_col, num_col, fontproperties=font_prop), fontfamily=plt.rcParams['font.family']) # Column name is fine
+                        ax.set_title(get_graph_text(f"{col1} × {col2} の {agg_method_display}", f"{agg_method_display} of {num_col} by {col1} x {col2}", fontproperties=font_prop), fontfamily=plt.rcParams['font.family'])
                         plt.xticks(rotation=45)
                         plt.tight_layout()
                         st.pyplot(fig)
@@ -752,9 +752,9 @@ def show_main_app():
                         ax=ax
                     )
 
-                    ax.set_title(get_graph_text(f"時間帯×曜日の{heat_metric}（{agg_method_display}）", f"{agg_method_display} of {heat_metric} by Time Slot x Weekday"), fontfamily=plt.rcParams['font.family'], fontsize=16)
-                    ax.set_xlabel(get_graph_text("曜日", "Weekday"), fontfamily=plt.rcParams['font.family'], fontsize=12)
-                    ax.set_ylabel(get_graph_text("時間帯スロット", "Time Slot"), fontfamily=plt.rcParams['font.family'], fontsize=12)
+                    ax.set_title(get_graph_text(f"時間帯×曜日の{heat_metric}（{agg_method_display}）", f"{agg_method_display} of {heat_metric} by Time Slot x Weekday", fontproperties=font_prop), fontfamily=plt.rcParams['font.family'], fontsize=16)
+                    ax.set_xlabel(get_graph_text("曜日", "Weekday", fontproperties=font_prop), fontfamily=plt.rcParams['font.family'], fontsize=12)
+                    ax.set_ylabel(get_graph_text("時間帯スロット", "Time Slot", fontproperties=font_prop), fontfamily=plt.rcParams['font.family'], fontsize=12)
 
                     for label in ax.get_xticklabels():
                         label.set_fontfamily(plt.rcParams['font.family'])
@@ -955,7 +955,7 @@ def show_main_app():
                         f"{trend_metric}の時系列 ({'全体' if trend_group == 'なし' else trend_group}別, fontproperties=font_prop)",
                         f"Time Series of {trend_metric} (by {'Overall' if trend_group == 'なし' else trend_group})"
                     ), fontfamily=plt.rcParams['font.family'], fontsize=16)
-                    ax.set_xlabel(get_graph_text("実施日", "Date"), fontfamily=plt.rcParams['font.family'], fontsize=12)
+                    ax.set_xlabel(get_graph_text("実施日", "Date", fontproperties=font_prop), fontfamily=plt.rcParams['font.family'], fontsize=12)
                     ax.set_ylabel(get_graph_text(f"{trend_metric} ({agg_period_display}平均, fontproperties=font_prop)", f"{trend_metric} ({agg_period_display} Average)"), fontfamily=plt.rcParams['font.family'], fontsize=12)
                     ax.legend(prop={'family':plt.rcParams['font.family']}, fontproperties=font_prop)
                     plt.tight_layout()
@@ -1034,9 +1034,9 @@ def show_main_app():
 
                     fig, ax = plt.subplots(figsize=(10, max(5, top_n * 0.3)))
                     rank_display[get_localized_text('平均値', 'Mean Value')].plot(kind='barh', ax=ax)
-                    ax.set_title(get_graph_text(f"{rank_group}別 {rank_metric}のランキング", f"Ranking of {rank_metric} by {rank_group}"), fontfamily=plt.rcParams['font.family'], fontsize=16)
-                    ax.set_xlabel(get_graph_text(f"{rank_metric} 平均値", f"{rank_metric} Mean Value"), fontfamily=plt.rcParams['font.family'], fontsize=12)
-                    ax.set_ylabel(get_graph_text(rank_group, rank_group), fontfamily=plt.rcParams['font.family'], fontsize=12) # Group name is data, keep as is
+                    ax.set_title(get_graph_text(f"{rank_group}別 {rank_metric}のランキング", f"Ranking of {rank_metric} by {rank_group}", fontproperties=font_prop), fontfamily=plt.rcParams['font.family'], fontsize=16)
+                    ax.set_xlabel(get_graph_text(f"{rank_metric} 平均値", f"{rank_metric} Mean Value", fontproperties=font_prop), fontfamily=plt.rcParams['font.family'], fontsize=12)
+                    ax.set_ylabel(get_graph_text(rank_group, rank_group, fontproperties=font_prop), fontfamily=plt.rcParams['font.family'], fontsize=12) # Group name is data, keep as is
                     
                     for label in ax.get_xticklabels():
                         label.set_fontfamily(plt.rcParams['font.family'])
