@@ -288,7 +288,7 @@ def show_main_app():
 
             if isinstance(dfmain, pd.DataFrame) and "担当チーム" in dfmain.columns:
                 # 文字列化・欠損除去
-                team_col = dfmain["担当チーム"].dropna().astype(str)
+                team_col = dfmain["担当チーム"].dropna().apply(lambda x: ','.join(x) if isinstance(x, list) else str(x))
 
                 st.write("dfmain 担当チーム一覧:", team_col.unique())
             else:
