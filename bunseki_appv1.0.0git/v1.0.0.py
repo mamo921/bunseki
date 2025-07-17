@@ -159,8 +159,13 @@ def main():
 
     if not st.session_state.logged_in:
         st.sidebar.header("ログイン")
-        username_input = st.sidebar.text_input("ユーザー名")
-        password_input = st.sidebar.text_input("パスワード", type="password")
+        # 入力欄
+        st.sidebar.text_input("ユーザー名", key="input_username")
+        st.sidebar.text_input("パスワード", type="password", key="input_password")
+
+        # 入力取得（ログインボタンより前に）
+        username_input = st.session_state.get("input_username", "").strip().lower()
+        password_input = st.session_state.get("input_password", "")
 
         if st.sidebar.button("ログイン"):
             st.write("デバッグ: 入力されたユーザー名:", username_input)
