@@ -11,6 +11,8 @@ import bcrypt
 import matplotlib.font_manager as fm # フォントマネージャーをインポート
 import os
 
+st.write("dfmain 担当チーム一覧:", st.session_state.get("dfmain")["担当チーム"].unique())
+
 # このファイルと同じ階層に static フォルダがある場合
 font_path = os.path.join(os.path.dirname(__file__), "static", "NotoSansJP-VariableFont_wght.ttf")
 # 絶対パスに変換（これが一番安全！）
