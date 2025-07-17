@@ -23,6 +23,7 @@ japanese_font_available = False
 if os.path.exists(font_path):
     try:
         font_prop = fm.FontProperties(fname=font_path)
+        plt.rcParams['font.family'] = font_prop.get_name()
         japanese_font_available = True
         st.info("日本語フォントを使用します。")
     except Exception as e:
