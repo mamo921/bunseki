@@ -442,19 +442,25 @@ def show_main_app():
             if not category_cols.empty:
                 selected_col = st.selectbox(get_localized_text("確認する列を選択", "Select column to check"), category_cols)
                 value_counts = df_display[selected_col].value_counts()
-                
-                fig, ax = plt.subplots(figsize=(10, 5))
-                value_counts.plot(kind='bar', ax=ax)
-                
-                # Apply font_prop to title, labels, and ticks
-                ax.set_title(get_graph_text(f"{selected_col}の値カウント", f"Value Counts of {selected_col}"), fontproperties=font_prop)
+
+                fig, ax = plt.subplots()
+                ax = sns.countplot(x=selected_col, data=df_filtered, order=df_filtered[selected_col].value_counts().index)
+
+                # グラフのタイトル・ラベル
+                ax.set_title(get_graph_text(f"{selected_col}の値カウント", f"Value Counts of {selected_col}"), fontproperties=font_prop, **title_font)
                 ax.set_xlabel(get_graph_text(selected_col, selected_col), fontproperties=font_prop)
                 ax.set_ylabel(get_graph_text("カウント", "Count"), fontproperties=font_prop)
+
+                # ← 🔥 ここが重要！！🔥
                 plt.xticks(fontproperties=font_prop)
                 plt.yticks(fontproperties=font_prop)
 
+                # ここで fig を上書き
+                fig = ax.get_figure()
+
+                # 表示
                 st.pyplot(fig)
-                
+
                 for label in ax.get_xticklabels():
                     label.set_fontproperties(font_prop)
                 for label in ax.get_yticklabels():
