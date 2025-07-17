@@ -68,6 +68,8 @@ def load_users_from_secrets():
 # ログインフォームの表示
 def login_form():
     st.subheader(get_localized_text("ログイン", "Login"))
+    for label in ax.get_xticklabels():
+        print(label.get_text())
 
     user_data = load_users_from_secrets()
 
