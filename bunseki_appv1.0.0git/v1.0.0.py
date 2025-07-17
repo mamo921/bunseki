@@ -430,7 +430,14 @@ def show_main_app():
                     else:
                         df_t = DataProcessor.process_dataframe(df_t)
                         if df_t is not None:
+                            # ✅ セッションに保存（最初のファイルのみでOK）
+                            if len(uploaded_dfs_temp) == 0:
+                                st.session_state["dfmain"] = df_t.copy()
+                                st.session_state["current_data"] = df_t.copy()
+                                st.session_state["df_filtered"] = df_t.copy()
+
                             uploaded_dfs_temp.append(df_t)
+
 
                 if uploaded_dfs_temp:
                     df_combined = pd.concat(uploaded_dfs_temp, ignore_index=True).drop_duplicates()
