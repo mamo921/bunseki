@@ -218,6 +218,7 @@ def show_main_app():
     with st.sidebar:
         st.markdown(get_localized_text("## 🔍 フィルター設定", "## 🔍 Filter Settings"))
         st.markdown("---")
+        st.write(df_filtered[selected_col].unique())
 
         dfmain_for_sidebar = st.session_state.get('dfmain')
 
@@ -480,8 +481,6 @@ def show_main_app():
                 plt.draw()
                 for label in ax.get_xticklabels():
                     label.set_fontproperties(font_prop)
-                
-                st.write(df_filtered[selected_col].unique())
 
                 # タイトル・軸ラベル
                 ax.set_title(get_graph_text(f"{selected_col}の値カウント", f"Value Counts of {selected_col}"), fontproperties=font_prop, **title_font)
