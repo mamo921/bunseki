@@ -284,7 +284,16 @@ def show_main_app():
             df_filtered = dfmain_for_sidebar.copy()
 
             df = st.session_state.get("dfmain")
-            team_col = dfmain["担当チーム"].dropna().apply(lambda x: ','.join(x) if isinstance(x, list) else str(x))
+            dfmain = st.session_state.get("dfmain")
+
+            if isinstance(dfmain, pd.DataFrame) and "担当チーム" in dfmain.columns:
+                # 文字列化・欠損除去
+                team_col = dfmain["担当チーム"].dropna().astype(str)
+
+                st.write("dfmain 担当チーム一覧:", team_col.unique())
+            else:
+                st.warning("dfmain または 担当チーム列が存在しません。")
+
 
             # 👥 担当チームフィルター
             if '担当チーム' in df_filtered.columns:
