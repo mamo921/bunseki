@@ -15,6 +15,7 @@ font_path = "bunseki_appv1.0.0git\static\NotoSansJP-Thin.woff2"
 font_prop = fm.FontProperties(fname=font_path)
 
 plt.rcParams['font.family'] = font_prop.get_name()
+plt.rcParams['font.sans-serif'] = [font_prop.get_name()]
 
 
 # matplotlibのフォント設定
