@@ -5,4 +5,4 @@ font = "Noto Sans JP"
 
 [[theme.fontFaces]]
 family = "Noto Sans JP"
-url = "static/NotoSansJP-VariableFont_wght.otf"
+url = "bunseki_appv1.0.0git/static/NotoSansJP-VariableFont_wght.otf"
