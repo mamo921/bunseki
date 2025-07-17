@@ -104,6 +104,7 @@ class DataProcessor:
             df['時間帯スロット'] = df['時間帯スロット'].str.strip()
         return df
 
+# ユーザー情報をStreamlit secretsからロードする関数
 def load_users_from_secrets():
     users_data = []
     if 'users' in st.secrets:
@@ -111,25 +112,20 @@ def load_users_from_secrets():
         st.write("デバッグ: st.secrets.users の型:", type(st.secrets.users))
         st.write("デバッグ: st.secrets.users の内容:", st.secrets.users)
 
-        # st.secrets.usersが辞書型であることを期待してループ
-        # TOMLの[users.user_mamo]形式の場合、st.secrets.usersは辞書のように振る舞います
-        if isinstance(st.secrets.users, dict):
-            for username_key in st.secrets.users.keys():
-                if username_key.startswith("user_"): # ユーザー名であることを示すプレフィックス
-                    user_info = st.secrets.users[username_key]
-                    if isinstance(user_info, dict) and 'username' in user_info and 'password_hash' in user_info:
-                        users_data.append(user_info)
-                    elif isinstance(user_info, str): # 旧形式のパスワードハッシュを直接格納している場合
-                        st.warning(f"secrets.tomlの'users.{username_key}'の形式が古い可能性があります。辞書形式を推奨します。")
-                        users_data.append({"username": username_key.replace("user_", ""), "password_hash": user_info})
-                else:
-                    st.warning(f"secrets.tomlの'users'セクションに予期しないキー '{username_key}' が見つかりました。'user_'で始まるキーのみが処理されます。")
-        else:
-            st.error("Streamlit secretsの'users'セクションの形式が不正です。辞書形式またはネストされたテーブル形式であるべきです。")
-            # もしst.secrets.usersがdictでなければ、Configオブジェクトの可能性もあるが、
-            # 現在のTOML定義([users.user_mamo])ではdictとしてアクセスできるはずです。
-            # このエラーが出た場合は、secretsの読み込み自体に問題がある可能性があります。
-
+        # AttrDictはkeys()メソッドを持つため、直接ループしてアクセスします
+        # isinstance(st.secrets.users, dict) のチェックは不要です
+        for username_key in st.secrets.users.keys():
+            if username_key.startswith("user_"): # ユーザー名であることを示すプレフィックス
+                user_info = st.secrets.users[username_key] # AttrDictから直接アクセス可能
+                if isinstance(user_info, dict) and 'username' in user_info and 'password_hash' in user_info:
+                    users_data.append(user_info)
+                elif isinstance(user_info, str): # 旧形式のパスワードハッシュを直接格納している場合
+                    st.warning(f"secrets.tomlの'users.{username_key}'の形式が古い可能性があります。辞書形式を推奨します。")
+                    users_data.append({"username": username_key.replace("user_", ""), "password_hash": user_info})
+            else:
+                st.warning(f"secrets.tomlの'users'セクションに予期しないキー '{username_key}' が見つかりました。'user_'で始まるキーのみが処理されます。")
+    
+    # ユーザーが一人もロードされなかった場合の最終エラーチェック
     if not users_data:
         st.error("Streamlit secretsにユーザー情報が設定されていないか、形式が不正です。")
     # デバッグ行：最終的にロードされたユーザーデータを表示
