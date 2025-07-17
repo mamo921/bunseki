@@ -137,23 +137,6 @@ def load_users_from_secrets():
 
     return users_data
 
-# ユーザー情報をStreamlit secretsからロードする関数
-def load_users_from_secrets():
-    users_data = []
-    if 'users' in st.secrets:
-        for username_key in st.secrets.users.keys():
-            if username_key.startswith("user_"): # ユーザー名であることを示すプレフィックス
-                user_info = st.secrets.users[username_key]
-                if isinstance(user_info, dict) and 'username' in user_info and 'password_hash' in user_info:
-                    users_data.append(user_info)
-                elif isinstance(user_info, str): # 旧形式のパスワードハッシュを直接格納している場合
-                    # このケースは推奨されないが、互換性のために考慮
-                    st.warning(f"secrets.tomlの'users.{username_key}'の形式が古い可能性があります。辞書形式を推奨します。")
-                    users_data.append({"username": username_key.replace("user_", ""), "password_hash": user_info})
-    if not users_data:
-        st.error("Streamlit secretsにユーザー情報が設定されていないか、形式が不正です。")
-    return users_data
-
 # パスワードをハッシュ化する関数
 def hash_password(password):
     return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
