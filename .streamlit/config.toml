@@ -1,12 +1,6 @@
-[server]
-enableStaticServing = true
+[theme]
+font = "sans serif"
 
 [[theme.fontFaces]]
 family = "noto-sans-jp"
-url = "https://fonts.gstatic.com/s/notosansjp/v52/-F61fjptAgt5VM-kVkqdyU8n3lvZwVs9FhI.woff2"
-weight = 400
-
-[theme]
-font = "noto-sans-jp"
-headingFont = "noto-sans-jp"
-codeFont = "monospace"
+url = "static/NotoSansJP-Regular.woff2"
