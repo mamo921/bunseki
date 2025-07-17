@@ -43,8 +43,13 @@ def show_main_dashboard():
     st.write(f"こんにちは、{st.session_state.get('username')} さん！")
 
     if st.button("ログアウト"):
-        st.session_state.clear()
+        # 安全にログアウト処理
+        st.session_state.pop("logged_in", None)
+        st.session_state.pop("username", None)
+        st.session_state.pop("username_input", None)
+        st.session_state.pop("password_input", None)
         st.experimental_rerun()
+
 
 # メイン関数
 def main():
