@@ -11,10 +11,9 @@ import bcrypt
 import matplotlib.font_manager as fm # フォントマネージャーをインポート
 
 # 相対パスで指定（Streamlit Cloudでも通る）
-font_path = "bunseki_appv1.0.0git/static/NotoSansJP-VariableFont_wght.otf"
-font_prop = fm.FontProperties(fname=font_path)
+# font_path = "bunseki_appv1.0.0git/static/NotoSansJP-VariableFont_wght.otf"
+# font_prop = fm.FontProperties(fname=font_path)
 
-font_prop = fm.FontProperties(fname=font_path)
 # matplotlibのフォント設定
 # 負の記号が文字化けするのを防ぐ
 plt.rcParams['axes.unicode_minus'] = False
@@ -22,22 +21,28 @@ plt.rcParams['axes.unicode_minus'] = False
 # 日本語フォントの設定をより堅牢にする
 # 一般的にStreamlit Cloudで利用可能なフォントを優先
 japanese_font_available = False
+# Initialize font_prop with a default or None
+font_prop = None
+
 try:
     # Noto Sans CJK JP を試す
-    fm.findfont('Noto Sans CJK JP', fallback_to_default=False)
+    noto_sans_path = fm.findfont('Noto Sans CJK JP', fallback_to_default=False)
     plt.rcParams['font.family'] = 'Noto Sans CJK JP'
+    font_prop = fm.FontProperties(fname=noto_sans_path)
     japanese_font_available = True
 except Exception:
     try:
         # IPAexGothic を試す
-        fm.findfont('IPAexGothic', fallback_to_default=False)
+        ipaex_gothic_path = fm.findfont('IPAexGothic', fallback_to_default=False)
         plt.rcParams['font.family'] = 'IPAexGothic'
+        font_prop = fm.FontProperties(fname=ipaex_gothic_path)
         japanese_font_available = True
     except Exception:
         # 日本語フォントが見つからない場合の警告
         st.warning("日本語フォントが見つかりませんでした。グラフのラベルは英語で表示されます。")
         plt.rcParams['font.family'] = 'sans-serif'
-        # 一般的なフォールバック
+        # Fallback for font_prop if no Japanese font is found
+        font_prop = fm.FontProperties(family='sans-serif') # Ensure font_prop is always set
 
 # 全体的なフォントサイズを設定（必要に応じて調整）
 plt.rcParams['font.size'] = 10
@@ -48,7 +53,10 @@ def get_localized_text(jp_text, en_text):
 
 # Helper function for graph localization (graphs switch to English if Japanese font not available)
 def get_graph_text(jp_text, en_text):
-    return jp_text
+    if japanese_font_available:
+        return jp_text
+    else:
+        return en_text
 
 
 # ページ設定
@@ -197,17 +205,18 @@ class DataProcessor:
 
 # メインダッシュボードの表示 (v1.0.0.py の main 関数を show_main_app にリネーム)
 def show_main_app():
-    st.markdown("""
-    <style>
-    @font-face {
-    font-family: 'Noto Sans JP';
-    src: url('/static/NotoSansJP-Thin.woff2') format('woff2');
-    }
-    body, div, p, span, input, label {
-    font-family: 'Noto Sans JP', sans-serif !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+    # This style block should be removed or commented out as it might interfere with font settings
+    # st.markdown("""
+    # <style>
+    # @font-face {
+    # font-family: 'Noto Sans JP';
+    # src: url('/static/NotoSansJP-Thin.woff2') format('woff2');
+    # }
+    # body, div, p, span, input, label {
+    # font-family: 'Noto Sans JP', sans-serif !important;
+    # }
+    # </style>
+    # """, unsafe_allow_html=True)
 
     st.title(get_localized_text("VRイベント分析アプリ", "VR Event Analysis App"))
 
@@ -457,15 +466,15 @@ def show_main_app():
                 fig, ax = plt.subplots(figsize=(10, 5))
                 value_counts.plot(kind='bar', ax=ax)
                 
-                title_font = {'fontfamily': plt.rcParams['font.family'], 'fontsize': 12}
-                ax.set_title(get_graph_text(f"{selected_col}の値カウント", f"Value Counts of {selected_col}"), fontproperties=font_prop, **title_font)
+                # Apply font_prop to title, labels, and ticks
+                ax.set_title(get_graph_text(f"{selected_col}の値カウント", f"Value Counts of {selected_col}"), fontproperties=font_prop)
                 ax.set_xlabel(get_graph_text(selected_col, selected_col), fontproperties=font_prop)
                 ax.set_ylabel(get_graph_text("カウント", "Count"), fontproperties=font_prop)
                 
                 for label in ax.get_xticklabels():
-                    label.set_fontfamily(plt.rcParams['font.family'])
+                    label.set_fontproperties(font_prop)
                 for label in ax.get_yticklabels():
-                    label.set_fontfamily(plt.rcParams['font.family'])
+                    label.set_fontproperties(font_prop)
                 
                 plt.xticks(rotation=45)
                 plt.tight_layout()
@@ -557,8 +566,13 @@ def show_main_app():
                                 with cols[i % 2]:
                                     fig, ax = plt.subplots(figsize=(8, 4))
                                     grouped_df[col_name_for_plot].plot(kind='bar', ax=ax)
-                                    ax.set_ylabel(get_graph_text(f"{target_num}の{metric_display_name}", f"{metric_display_name} of {target_num}"), fontfamily=plt.rcParams['font.family'])
-                                    ax.set_title(get_graph_text(f"{group_col}ごとの{target_num}（{metric_display_name}）", f"{metric_display_name} of {target_num} by {group_col}"), fontfamily=plt.rcParams['font.family'])
+                                    # Apply font_prop to title, labels, and ticks
+                                    ax.set_ylabel(get_graph_text(f"{target_num}の{metric_display_name}", f"{metric_display_name} of {target_num}"), fontproperties=font_prop)
+                                    ax.set_title(get_graph_text(f"{group_col}ごとの{target_num}（{metric_display_name}）", f"{metric_display_name} of {target_num} by {group_col}"), fontproperties=font_prop)
+                                    for label in ax.get_xticklabels():
+                                        label.set_fontproperties(font_prop)
+                                    for label in ax.get_yticklabels():
+                                        label.set_fontproperties(font_prop)
                                     plt.xticks(rotation=45)
                                     plt.tight_layout()
                                     st.pyplot(fig)
@@ -638,8 +652,13 @@ def show_main_app():
 
                         fig, ax = plt.subplots(figsize=(10, 5))
                         cross_table.plot(kind='bar', ax=ax)
-                        ax.set_ylabel(get_graph_text(num_col, num_col), fontfamily=plt.rcParams['font.family']) # Column name is fine
-                        ax.set_title(get_graph_text(f"{col1} × {col2} の {agg_method_display}", f"{agg_method_display} of {num_col} by {col1} x {col2}"), fontfamily=plt.rcParams['font.family'])
+                        # Apply font_prop to title, labels, and ticks
+                        ax.set_ylabel(get_graph_text(num_col, num_col), fontproperties=font_prop) # Column name is fine
+                        ax.set_title(get_graph_text(f"{col1} × {col2} の {agg_method_display}", f"{agg_method_display} of {num_col} by {col1} x {col2}"), fontproperties=font_prop)
+                        for label in ax.get_xticklabels():
+                            label.set_fontproperties(font_prop)
+                        for label in ax.get_yticklabels():
+                            label.set_fontproperties(font_prop)
                         plt.xticks(rotation=45)
                         plt.tight_layout()
                         st.pyplot(fig)
@@ -747,14 +766,15 @@ def show_main_app():
                         ax=ax
                     )
 
-                    ax.set_title(get_graph_text(f"時間帯×曜日の{heat_metric}（{agg_method_display}）", f"{agg_method_display} of {heat_metric} by Time Slot x Weekday"), fontfamily=plt.rcParams['font.family'], fontsize=16)
-                    ax.set_xlabel(get_graph_text("曜日", "Weekday"), fontfamily=plt.rcParams['font.family'], fontsize=12)
-                    ax.set_ylabel(get_graph_text("時間帯スロット", "Time Slot"), fontfamily=plt.rcParams['font.family'], fontsize=12)
+                    # Apply font_prop to title, labels, and ticks
+                    ax.set_title(get_graph_text(f"時間帯×曜日の{heat_metric}（{agg_method_display}）", f"{agg_method_display} of {heat_metric} by Time Slot x Weekday"), fontproperties=font_prop, fontsize=16)
+                    ax.set_xlabel(get_graph_text("曜日", "Weekday"), fontproperties=font_prop, fontsize=12)
+                    ax.set_ylabel(get_graph_text("時間帯スロット", "Time Slot"), fontproperties=font_prop, fontsize=12)
 
                     for label in ax.get_xticklabels():
-                        label.set_fontfamily(plt.rcParams['font.family'])
+                        label.set_fontproperties(font_prop)
                     for label in ax.get_yticklabels():
-                        label.set_fontfamily(plt.rcParams['font.family'])
+                        label.set_fontproperties(font_prop)
 
                     plt.xticks(rotation=45)
                     plt.tight_layout()
@@ -882,10 +902,10 @@ def show_main_app():
                     resampled = trend_df.set_index('実施日_timestamp')[trend_metric].resample(period_map_internal[agg_period_display]).mean()
                     
                     if not resampled.empty:
-                        resampled.plot(ax=ax, label=get_graph_text(f'{agg_period_display}平均', f'{agg_period_display} Average'))
+                        resampled.plot(ax=ax, label=get_graph_text(f'{agg_period_display}平均', f'{agg_period_display} Average'), fontproperties=font_prop)
                         moving = resampled.rolling(window=moving_avg, min_periods=1).mean() 
                         if not moving.empty:
-                            moving.plot(ax=ax, label=get_graph_text(f'{moving_avg}{agg_period_display[0]}移動平均', f'{moving_avg}{agg_period_display[0]} Moving Average'), style='--') 
+                            moving.plot(ax=ax, label=get_graph_text(f'{moving_avg}{agg_period_display[0]}移動平均', f'{moving_avg}{agg_period_display[0]} Moving Average'), style='--', fontproperties=font_prop) 
                         else:
                             st.info(get_localized_text("移動平均を計算する十分なデータがありません。", "Insufficient data to calculate moving average."))
                         has_data_to_plot = True
@@ -926,10 +946,10 @@ def show_main_app():
                                     if not group_data.empty:
                                         resampled = group_data.set_index('実施日_timestamp')[trend_metric].resample(period_map_internal[agg_period_display]).mean()
                                         if not resampled.empty:
-                                            resampled.plot(ax=ax, label=str(group)) # Group name is data, keep as is
+                                            resampled.plot(ax=ax, label=str(group), fontproperties=font_prop) # Group name is data, keep as is
                                             moving = resampled.rolling(window=moving_avg, min_periods=1).mean()
                                             if not moving.empty:
-                                                moving.plot(ax=ax, label=get_graph_text(f'{str(group)} ({moving_avg}{agg_period_display[0]}移動平均)', f'{str(group)} ({moving_avg}{agg_period_display[0]} Moving Average)'), style='--') 
+                                                moving.plot(ax=ax, label=get_graph_text(f'{str(group)} ({moving_avg}{agg_period_display[0]}移動平均)', f'{str(group)} ({moving_avg}{agg_period_display[0]} Moving Average)'), style='--', fontproperties=font_prop) 
                                             else:
                                                 st.info(get_localized_text(f"グループ '{group}' の移動平均を計算する十分なデータがありません。", f"Insufficient data to calculate moving average for group '{group}'."))
                                             has_data_to_plot = True
@@ -946,13 +966,18 @@ def show_main_app():
                         st.error(get_localized_text(f"選択されたグループ列 '{trend_group}' がデータフレームに存在しません。", f"Selected group column '{trend_group}' does not exist in the dataframe."))
 
                 if has_data_to_plot:
+                    # Apply font_prop to title, labels, and legend
                     ax.set_title(get_graph_text(
-                        f"{trend_metric}の時系列 ({'全体' if trend_group == 'なし' else trend_group}別, fontproperties=font_prop)",
+                        f"{trend_metric}の時系列 ({'全体' if trend_group == 'なし' else trend_group}別)",
                         f"Time Series of {trend_metric} (by {'Overall' if trend_group == 'なし' else trend_group})"
-                    ), fontfamily=plt.rcParams['font.family'], fontsize=16)
-                    ax.set_xlabel(get_graph_text("実施日", "Date"), fontfamily=plt.rcParams['font.family'], fontsize=12)
-                    ax.set_ylabel(get_graph_text(f"{trend_metric} ({agg_period_display}平均, fontproperties=font_prop)", f"{trend_metric} ({agg_period_display} Average)"), fontfamily=plt.rcParams['font.family'], fontsize=12)
-                    ax.legend(prop={'family':plt.rcParams['font.family']}, fontproperties=font_prop)
+                    ), fontproperties=font_prop, fontsize=16)
+                    ax.set_xlabel(get_graph_text("実施日", "Date"), fontproperties=font_prop, fontsize=12)
+                    ax.set_ylabel(get_graph_text(f"{trend_metric} ({agg_period_display}平均)", f"{trend_metric} ({agg_period_display} Average)"), fontproperties=font_prop, fontsize=12)
+                    ax.legend(prop=font_prop) # Use font_prop directly for legend
+                    for label in ax.get_xticklabels():
+                        label.set_fontproperties(font_prop)
+                    for label in ax.get_yticklabels():
+                        label.set_fontproperties(font_prop)
                     plt.tight_layout()
                     st.pyplot(fig)
                 else:
@@ -1029,14 +1054,15 @@ def show_main_app():
 
                     fig, ax = plt.subplots(figsize=(10, max(5, top_n * 0.3)))
                     rank_display[get_localized_text('平均値', 'Mean Value')].plot(kind='barh', ax=ax)
-                    ax.set_title(get_graph_text(f"{rank_group}別 {rank_metric}のランキング", f"Ranking of {rank_metric} by {rank_group}"), fontfamily=plt.rcParams['font.family'], fontsize=16)
-                    ax.set_xlabel(get_graph_text(f"{rank_metric} 平均値", f"{rank_metric} Mean Value"), fontfamily=plt.rcParams['font.family'], fontsize=12)
-                    ax.set_ylabel(get_graph_text(rank_group, rank_group), fontfamily=plt.rcParams['font.family'], fontsize=12) # Group name is data, keep as is
+                    # Apply font_prop to title, labels, and ticks
+                    ax.set_title(get_graph_text(f"{rank_group}別 {rank_metric}のランキング", f"Ranking of {rank_metric} by {rank_group}"), fontproperties=font_prop, fontsize=16)
+                    ax.set_xlabel(get_graph_text(f"{rank_metric} 平均値", f"{rank_metric} Mean Value"), fontproperties=font_prop, fontsize=12)
+                    ax.set_ylabel(get_graph_text(rank_group, rank_group), fontproperties=font_prop, fontsize=12) # Group name is data, keep as is
                     
                     for label in ax.get_xticklabels():
-                        label.set_fontfamily(plt.rcParams['font.family'])
+                        label.set_fontproperties(font_prop)
                     for label in ax.get_yticklabels():
-                        label.set_fontfamily(plt.rcParams['font.family'])
+                        label.set_fontproperties(font_prop)
 
                     plt.tight_layout()
                     st.pyplot(fig)
