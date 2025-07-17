@@ -494,13 +494,9 @@ def show_main_app():
 
                 # ✅ x軸のTickラベルを完全に再描画する
                 xtick_labels = [tick.get_text() for tick in ax.get_xticklabels()]
-                ax.set_xticks(range(len(xtick_labels)))
-                ax.set_xticklabels(xtick_labels, fontproperties=font_prop, rotation=45, ha='right')  # ← ← ← ここがキモ
 
                 # y軸も念のため再設定（なくてもいいけど）
                 ytick_labels = [tick.get_text() for tick in ax.get_yticklabels()]
-                ax.set_yticks(ax.get_yticks())
-                ax.set_yticklabels(ytick_labels, fontproperties=font_prop)
 
                 # 表示
                 st.pyplot(fig)
