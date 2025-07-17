@@ -225,6 +225,8 @@ def show_main_app():
 
     SessionManager.initialize()
 
+    df_filtered = None  # ← 最初に定義しておく！（これが重要）
+
     with st.sidebar:
         st.markdown(get_localized_text("## 🔍 フィルター設定"))
         st.markdown("---")
