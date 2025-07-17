@@ -633,6 +633,17 @@ def show_main_app():
             st.warning(get_localized_text("データがアップロードされていないか、フィルターによってデータがありません。データ管理タブでファイルをアップロードしてください。"))
 
     with tabs[2]:
+        if "dfmain" not in st.session_state:
+            st.warning("データが読み込まれていません")
+            return
+        df_filtered = st.session_state["dfmain"]
+
+        if selected_col not in df_filtered.columns:
+            st.warning("選択された列がデータに含まれていません")
+            return
+
+        fig, ax = plt.subplots()
+        sns.countplot(x=selected_col, data=df_filtered, order=df_filtered[selected_col].value_counts().index, ax=ax)
         st.header(get_localized_text("📊 クロス集計"))
 
         if 'current_data' in st.session_state and st.session_state.current_data is not None and not st.session_state.current_data.empty:
