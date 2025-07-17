@@ -41,10 +41,13 @@ plt.rcParams['font.size'] = 10
 
 # Helper function for localization
 def get_localized_text(jp_text, en_text):
-    if japanese_font_available:
-        return jp_text
-    else:
-        return en_text
+    # UI要素は常に日本語を優先し、フォントがなければ英語にフォールバック
+    return jp_text if japanese_font_available else en_text
+
+# Helper function for graph localization
+def get_graph_text(jp_text, en_text):
+    # グラフ要素は、日本語フォントがなければ強制的に英語
+    return jp_text if japanese_font_available else en_text
 
 # ページ設定
 st.set_page_config(page_title=get_localized_text("VRイベント分析ツール", "VR Event Analysis Tool"), layout="wide")
@@ -441,9 +444,9 @@ def show_main_app():
                 value_counts.plot(kind='bar', ax=ax)
                 
                 title_font = {'fontfamily': plt.rcParams['font.family'], 'fontsize': 12}
-                ax.set_title(get_localized_text(f"{selected_col}の値カウント", f"Value Counts of {selected_col}"), **title_font)
-                ax.set_xlabel(selected_col, fontfamily=plt.rcParams['font.family'])
-                ax.set_ylabel(get_localized_text("カウント", "Count"), fontfamily=plt.rcParams['font.family'])
+                ax.set_title(get_graph_text(f"{selected_col}の値カウント", f"Value Counts of {selected_col}"), **title_font)
+                ax.set_xlabel(get_graph_text(selected_col, selected_col), fontfamily=plt.rcParams['font.family'])
+                ax.set_ylabel(get_graph_text("カウント", "Count"), fontfamily=plt.rcParams['font.family'])
                 
                 for label in ax.get_xticklabels():
                     label.set_fontfamily(plt.rcParams['font.family'])
@@ -540,11 +543,11 @@ def show_main_app():
                                 with cols[i % 2]:
                                     fig, ax = plt.subplots(figsize=(8, 4))
                                     grouped_df[col_name_for_plot].plot(kind='bar', ax=ax)
-                                    ax.set_ylabel(get_localized_text(f"{target_num}の{metric_display_name}", f"{metric_display_name} of {target_num}"))
-                                    ax.set_title(get_localized_text(
+                                    ax.set_ylabel(get_graph_text(f"{target_num}の{metric_display_name}", f"{metric_display_name} of {target_num}"), fontfamily=plt.rcParams['font.family'])
+                                    ax.set_title(get_graph_text(
                                         f"{group_col}ごとの{target_num}（{metric_display_name}）",
                                         f"{metric_display_name} of {target_num} by {group_col}"
-                                    ))
+                                    ), fontfamily=plt.rcParams['font.family'])
                                     plt.xticks(rotation=45)
                                     plt.tight_layout()
                                     st.pyplot(fig)
@@ -624,11 +627,11 @@ def show_main_app():
 
                         fig, ax = plt.subplots(figsize=(10, 5))
                         cross_table.plot(kind='bar', ax=ax)
-                        ax.set_ylabel(num_col) # Column name is fine
-                        ax.set_title(get_localized_text(
+                        ax.set_ylabel(get_graph_text(num_col, num_col), fontfamily=plt.rcParams['font.family']) # Column name is fine
+                        ax.set_title(get_graph_text(
                             f"{col1} × {col2} の {agg_method_display}",
                             f"{agg_method_display} of {num_col} by {col1} x {col2}"
-                        ))
+                        ), fontfamily=plt.rcParams['font.family'])
                         plt.xticks(rotation=45)
                         plt.tight_layout()
                         st.pyplot(fig)
@@ -736,12 +739,12 @@ def show_main_app():
                         ax=ax
                     )
 
-                    ax.set_title(get_localized_text(
+                    ax.set_title(get_graph_text(
                         f"時間帯×曜日の{heat_metric}（{agg_method_display}）",
                         f"{agg_method_display} of {heat_metric} by Time Slot x Weekday"
                     ), fontfamily=plt.rcParams['font.family'], fontsize=16)
-                    ax.set_xlabel(get_localized_text("曜日", "Weekday"), fontfamily=plt.rcParams['font.family'], fontsize=12)
-                    ax.set_ylabel(get_localized_text("時間帯スロット", "Time Slot"), fontfamily=plt.rcParams['font.family'], fontsize=12)
+                    ax.set_xlabel(get_graph_text("曜日", "Weekday"), fontfamily=plt.rcParams['font.family'], fontsize=12)
+                    ax.set_ylabel(get_graph_text("時間帯スロット", "Time Slot"), fontfamily=plt.rcParams['font.family'], fontsize=12)
 
                     for label in ax.get_xticklabels():
                         label.set_fontfamily(plt.rcParams['font.family'])
@@ -874,10 +877,10 @@ def show_main_app():
                     resampled = trend_df.set_index('実施日_timestamp')[trend_metric].resample(period_map_internal[agg_period_display]).mean()
                     
                     if not resampled.empty:
-                        resampled.plot(ax=ax, label=get_localized_text(f'{agg_period_display}平均', f'{agg_period_display} Average'))
+                        resampled.plot(ax=ax, label=get_graph_text(f'{agg_period_display}平均', f'{agg_period_display} Average'))
                         moving = resampled.rolling(window=moving_avg, min_periods=1).mean() 
                         if not moving.empty:
-                            moving.plot(ax=ax, label=get_localized_text(f'{moving_avg}{agg_period_display[0]}移動平均', f'{moving_avg}{agg_period_display[0]} Moving Average'), style='--') 
+                            moving.plot(ax=ax, label=get_graph_text(f'{moving_avg}{agg_period_display[0]}移動平均', f'{moving_avg}{agg_period_display[0]} Moving Average'), style='--') 
                         else:
                             st.info(get_localized_text("移動平均を計算する十分なデータがありません。", "Insufficient data to calculate moving average."))
                         has_data_to_plot = True
@@ -918,10 +921,10 @@ def show_main_app():
                                     if not group_data.empty:
                                         resampled = group_data.set_index('実施日_timestamp')[trend_metric].resample(period_map_internal[agg_period_display]).mean()
                                         if not resampled.empty:
-                                            resampled.plot(ax=ax, label=str(group))
+                                            resampled.plot(ax=ax, label=str(group)) # Group name is data, keep as is
                                             moving = resampled.rolling(window=moving_avg, min_periods=1).mean()
                                             if not moving.empty:
-                                                moving.plot(ax=ax, label=get_localized_text(f'{str(group)} ({moving_avg}{agg_period_display[0]}移動平均)', f'{str(group)} ({moving_avg}{agg_period_display[0]} Moving Average)'), style='--') 
+                                                moving.plot(ax=ax, label=get_graph_text(f'{str(group)} ({moving_avg}{agg_period_display[0]}移動平均)', f'{str(group)} ({moving_avg}{agg_period_display[0]} Moving Average)'), style='--') 
                                             else:
                                                 st.info(get_localized_text(f"グループ '{group}' の移動平均を計算する十分なデータがありません。", f"Insufficient data to calculate moving average for group '{group}'."))
                                             has_data_to_plot = True
@@ -938,12 +941,12 @@ def show_main_app():
                         st.error(get_localized_text(f"選択されたグループ列 '{trend_group}' がデータフレームに存在しません。", f"Selected group column '{trend_group}' does not exist in the dataframe."))
 
                 if has_data_to_plot:
-                    ax.set_title(get_localized_text(
+                    ax.set_title(get_graph_text(
                         f"{trend_metric}の時系列 ({'全体' if trend_group == 'なし' else trend_group}別)",
                         f"Time Series of {trend_metric} (by {'Overall' if trend_group == 'なし' else trend_group})"
                     ), fontfamily=plt.rcParams['font.family'], fontsize=16)
-                    ax.set_xlabel(get_localized_text("実施日", "Date"), fontfamily=plt.rcParams['font.family'], fontsize=12)
-                    ax.set_ylabel(get_localized_text(f"{trend_metric} ({agg_period_display}平均)", f"{trend_metric} ({agg_period_display} Average)"), fontfamily=plt.rcParams['font.family'], fontsize=12)
+                    ax.set_xlabel(get_graph_text("実施日", "Date"), fontfamily=plt.rcParams['font.family'], fontsize=12)
+                    ax.set_ylabel(get_graph_text(f"{trend_metric} ({agg_period_display}平均)", f"{trend_metric} ({agg_period_display} Average)"), fontfamily=plt.rcParams['font.family'], fontsize=12)
                     ax.legend(prop={'family':plt.rcParams['font.family']})
                     plt.tight_layout()
                     st.pyplot(fig)
@@ -1021,12 +1024,12 @@ def show_main_app():
 
                     fig, ax = plt.subplots(figsize=(10, max(5, top_n * 0.3)))
                     rank_display[get_localized_text('平均値', 'Mean Value')].plot(kind='barh', ax=ax)
-                    ax.set_title(get_localized_text(
+                    ax.set_title(get_graph_text(
                         f"{rank_group}別 {rank_metric}のランキング",
                         f"Ranking of {rank_metric} by {rank_group}"
                     ), fontfamily=plt.rcParams['font.family'], fontsize=16)
-                    ax.set_xlabel(get_localized_text(f"{rank_metric} 平均値", f"{rank_metric} Mean Value"), fontfamily=plt.rcParams['font.family'], fontsize=12)
-                    ax.set_ylabel(rank_group, fontfamily=plt.rcParams['font.family'], fontsize=12)
+                    ax.set_xlabel(get_graph_text(f"{rank_metric} 平均値", f"{rank_metric} Mean Value"), fontfamily=plt.rcParams['font.family'], fontsize=12)
+                    ax.set_ylabel(get_graph_text(rank_group, rank_group), fontfamily=plt.rcParams['font.family'], fontsize=12) # Group name is data, keep as is
                     
                     for label in ax.get_xticklabels():
                         label.set_fontfamily(plt.rcParams['font.family'])
@@ -1090,7 +1093,7 @@ def show_main_app():
                 df['参加率(%)'] = (df['参加者数'] / df['申込数']) * 100
             if '満足率(%)' not in df.columns and '満足回答' in df.columns and '参加者数' in df.columns:
                 df['満足率(%)'] = (df['満足回答'] / df['参加者数']) * 100
-            if 'リアクション率' not in df.columns and '参加者数' in df.columns:
+            if 'リアクション率' not in in df.columns and '参加者数' in df.columns:
                 df['リアクション率'] = df['リアクション数'] / df['参加者数']
 
             df = DataProcessor.expand_time_slots(df)
