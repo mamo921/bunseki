@@ -11,34 +11,26 @@ import bcrypt
 import matplotlib.font_manager as fm  # フォントマネージャーをインポート
 import os
 
-font_path = "bunseki_appv1.0.0git/static/NotoSansJP-VariableFont_wght.otf"
-if os.path.exists(font_path):
-    font_prop = fm.FontProperties(fname=font_path)
-    japanese_font_available = True
-    st.info("日本語フォント 'NotoSansJP-Regular.otf' を使用します。")
-else:
-    st.warning("日本語フォントが見つかりませんでした。デフォルトフォントで描画します。")
-    font_prop = None
-    japanese_font_available = False
-
 # matplotlibのフォント設定
 plt.rcParams['axes.unicode_minus'] = False  # 負の記号が文字化けするのを防ぐ
-
-# 日本語フォントの設定をより堅牢にする
-japanese_font_available = False
-font_prop = None  # font_prop を初期化
-
-try:
-    font_path = "static/NotoSansJP-Regular.otf"
-    font_prop = fm.FontProperties(fname=font_path)
-    japanese_font_available = True
-    st.info("日本語フォント 'NotoSansJP-Regular.otf' を使用します。")
-except Exception as e:
-    st.warning(f"日本語フォントが読み込めませんでした: {e}")
-    font_prop = None  # フォント指定なしで描画（英語表示など）
-
-# グラフ全体のフォントサイズ（必要なら調整）
 plt.rcParams['font.size'] = 10
+
+# 日本語フォントの設定
+font_prop = None
+japanese_font_available = False
+
+# フォントファイルのパス（Streamlit Cloud では相対パスで static/ フォルダ内にある必要あり）
+font_path = "static/NotoSansJP-Regular.otf"
+
+if os.path.exists(font_path):
+    try:
+        font_prop = fm.FontProperties(fname=font_path)
+        japanese_font_available = True
+        st.info("日本語フォント 'NotoSansJP-Regular.otf' を使用します。")
+    except Exception as e:
+        st.warning(f"フォント読み込みに失敗しました: {e}")
+else:
+    st.warning("日本語フォントが見つかりません。英語フォントで代用されます。")
 
 # UIテキストは常に日本語
 def get_localized_text(jp_text, en_text):
