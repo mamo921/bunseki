@@ -173,16 +173,15 @@ def main():
             users = load_users_from_secrets() # secretsからユーザー情報をロード
             user_found = False
             for user in users:
-                # --- ここから追加 ---
-                st.write("デバッグ: secretsから取得したユーザー情報:", user['username'], user.get('password_hash', 'ハッシュなし')) # パスワードハッシュを直接表示しない
-                # --- ここまで追加 ---
+                # ユーザー名比較ログをここに！
+                st.write("デバッグ: ユーザー名比較", "user側:", user['username'], "| 入力:", username_input)
 
                 if user['username'] == username_input:
                     user_found = True
                     password_match = verify_password(password_input, user['password_hash'])
-                
+
                     st.write("デバッグ: パスワード一致した？", password_match)
-                
+
                     if password_match:
                         st.session_state.logged_in = True
                         st.session_state.username = username_input
@@ -193,8 +192,6 @@ def main():
                     break
 
 
-
-                    break
             if not user_found:
                 st.sidebar.error("ユーザー名が見つかりません。")
 
