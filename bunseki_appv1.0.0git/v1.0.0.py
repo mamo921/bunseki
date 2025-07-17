@@ -20,32 +20,26 @@ def load_users_from_secrets():
 def login_form():
     st.title("ログイン")
 
+    # フォーム定義
     with st.form("login_form"):
         username_input = st.text_input("ユーザー名")
         password_input = st.text_input("パスワード", type="password")
         submitted = st.form_submit_button("ログイン")
-
+    
+    # フォームの外で判定する
     if submitted:
-        st.write("デバッグ: 入力されたユーザー名:", username_input)
-        st.write("デバッグ: 入力されたパスワード（ハッシュ化前）:", password_input)
-
-        users = load_users_from_secrets()
-        for user in users:
-            if user["username"].lower() == username_input.strip().lower():
+        for user in user_data:
+            if username_input == user["username"]:
                 if verify_password(password_input, user["password_hash"]):
                     st.session_state["logged_in"] = True
                     st.session_state["username"] = user["username"]
-                    st.success("ログイン成功！")
-                    if verify_password(password_input, user["password_hash"]):
-                        st.session_state["logged_in"] = True
-                        st.session_state["username"] = user["username"]
-                        st.experimental_rerun()  # ← rerun は何も表示せず即実行！
-
-                    return
+                    st.experimental_rerun()  # ← ここは form の外だからOK！
                 else:
-                    st.warning("パスワードが違います")
-                    return
-        st.warning("ユーザーが見つかりません")
+                    st.error("パスワードが違います。")
+                break
+        else:
+            st.error("ユーザーが見つかりません。")
+
 
 # ログイン済みダッシュボード
 def show_main_dashboard():
