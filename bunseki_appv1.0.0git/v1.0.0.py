@@ -45,7 +45,8 @@ def get_localized_text(jp_text, en_text):
 
 # Helper function for graph localization (graphs switch to English if Japanese font not available)
 def get_graph_text(jp_text, en_text):
-    return jp_text if japanese_font_available else en_text
+    return en_text if not japanese_font_available else jp_text
+
 
 # ページ設定
 st.set_page_config(page_title=get_localized_text("VRイベント分析ツール", "VR Event Analysis Tool"), layout="wide")
