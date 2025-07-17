@@ -655,7 +655,7 @@ def show_main_app():
                         index='時間帯スロット',
                         columns='曜日',
                         aggfunc=agg_map[agg_method]
-                    )
+                        )
 
                     weekdays = ['月', '火', '水', '木', '金', '土', '日']
                     existing_weekdays = [day for day in weekdays if day in pivot_table.columns]
@@ -705,7 +705,7 @@ def show_main_app():
                         key="heat_download"
                     )
 
-                    st.subheader("� 特徴的なパターン")
+                    st.subheader("📊 特徴的なパターン")
 
                     if not pivot_table.empty:
                         max_val_series = pivot_table.max()
@@ -1112,7 +1112,7 @@ def main():
         st.sidebar.markdown(f"**ようこそ、{st.session_state.get('username')} さん！**")
         if st.sidebar.button("ログアウト"):
             # ログアウト処理
-            for key in ["logged_in", "username"]:
+            for key in ["logged_in", "username", "num_uploaders"]: # num_uploadersもクリア
                 st.session_state.pop(key, None)
             st.rerun()
         show_main_app()
