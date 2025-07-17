@@ -487,7 +487,15 @@ def show_main_app():
                 value_counts = df_display[selected_col].value_counts()
 
                 fig, ax = plt.subplots()
-                sns.countplot(x=selected_col, data=df_filtered, order=df_filtered[selected_col].value_counts().index, ax=ax)
+                if df_filtered is not None and selected_col in df_filtered.columns:
+                    sns.countplot(
+                        x=selected_col,
+                        data=df_filtered,
+                        order=df_filtered[selected_col].value_counts().index,
+                        ax=ax
+                    )
+                else:
+                    st.warning("データが読み込まれていないか、指定された列が存在しません。")
 
                 # 🔽 x軸のラベルタイトルに日本語フォントを適用（これがないと豆腐になる）
                 ax.set_xlabel(get_graph_text(str(selected_col)), fontproperties=font_prop)
