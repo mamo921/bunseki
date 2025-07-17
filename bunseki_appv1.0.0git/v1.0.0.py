@@ -606,6 +606,7 @@ def show_main_app():
                                     grouped_df[col_name_for_plot].plot(kind='bar', ax=ax)
                                     # Apply font_prop to title, labels, and ticks
                                     ax.set_ylabel(get_graph_text(f"{target_num}の{metric_display_name}"), fontproperties=font_prop)
+                                    ax.set_xlabel(get_graph_text(group_col), fontproperties=font_prop)
                                     ax.set_title(get_graph_text(f"{group_col}ごとの{target_num}（{metric_display_name}）"), fontproperties=font_prop)
                                     for label in ax.get_xticklabels():
                                         label.set_fontproperties(font_prop)
@@ -703,6 +704,7 @@ def show_main_app():
                         cross_table.plot(kind='bar', ax=ax)
                         # Apply font_prop to title, labels, and ticks
                         ax.set_ylabel(get_graph_text(num_col), fontproperties=font_prop) # Column name is fine
+                        ax.set_xlabel(get_graph_text(col1), fontproperties=font_prop)
                         ax.set_title(get_graph_text(f"{col1} × {col2} の {agg_method_display}"), fontproperties=font_prop)
                         for label in ax.get_xticklabels():
                             label.set_fontproperties(font_prop)
@@ -1110,6 +1112,7 @@ def show_main_app():
                     ax.set_ylabel(get_graph_text(rank_group), fontproperties=font_prop, fontsize=12) # Group name is data, keep as is
                     ax.set_xticklabels(ax.get_xticklabels(), fontproperties=font_prop)
                     ax.set_yticklabels(ax.get_yticklabels(), fontproperties=font_prop)
+                    ax.set_xlabel(get_graph_text(str(f"{rank_metric} 平均値")), fontproperties=font_prop)
 
                     for label in ax.get_xticklabels():
                         label.set_fontproperties(font_prop)
