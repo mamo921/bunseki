@@ -29,13 +29,15 @@ def login_form():
         for user in load_users_from_secrets():
             if user["username"].lower() == username_input:
                 if verify_password(password_input, user["password_hash"]):
+                    # rerunせずにそのまま状態更新
                     st.session_state["logged_in"] = True
                     st.session_state["username"] = user["username"]
-                    st.experimental_rerun()
+                    return  # ★ rerunしないで return！
                 else:
                     st.sidebar.error("パスワードが違います")
                 return
         st.sidebar.error("ユーザーが見つかりません")
+
 
 # ログイン済みダッシュボード
 def show_main_dashboard():
