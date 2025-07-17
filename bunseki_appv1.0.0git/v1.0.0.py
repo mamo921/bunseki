@@ -225,6 +225,20 @@ def show_main_app():
 
     SessionManager.initialize()
 
+    # 🔁 データが処理済みフラグは True だが、中身が None or 空なら再処理
+    if (
+        st.session_state.get("upload_files") and
+        st.session_state.get("uploaded_file_processed") and
+        (
+            st.session_state.get("dfmain") is None or
+            st.session_state["dfmain"].empty or
+            st.session_state.get("current_data") is None or
+            st.session_state["current_data"].empty
+        )
+    ):
+        st.session_state["uploaded_file_processed"] = False
+        st.rerun()
+
     df_filtered = None  # ← 最初に定義しておく！（これが重要）
 
     with st.sidebar:
