@@ -13,8 +13,9 @@ import os
 
 dfmain = st.session_state.get("dfmain")
 
+df = st.session_state.get("dfmain")
+
 if isinstance(dfmain, pd.DataFrame):
-    df = st.session_state.get("dfmain")
     if "担当チーム" in dfmain.columns:
         st.write("dfmain 担当チーム一覧:", dfmain["担当チーム"].unique())
     else:
