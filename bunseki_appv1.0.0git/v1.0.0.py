@@ -20,31 +20,27 @@ def load_users_from_secrets():
 def login_form():
     st.title("ログイン")
 
-    # フォーム使えばEnterキーでログインできる！
     with st.form("login_form"):
-        st.text_input("ユーザー名", key="username_input")
-        st.text_input("パスワード", type="password", key="password_input")
+        username_input = st.text_input("ユーザー名")
+        password_input = st.text_input("パスワード", type="password")
         submitted = st.form_submit_button("ログイン")
 
     if submitted:
-        username_input = st.session_state.get("username_input", "").strip().lower()
-        password_input = st.session_state.get("password_input", "")
-
         st.write("デバッグ: 入力されたユーザー名:", username_input)
         st.write("デバッグ: 入力されたパスワード（ハッシュ化前）:", password_input)
 
         users = load_users_from_secrets()
         for user in users:
-            if user["username"].lower() == username_input:
+            if user["username"].lower() == username_input.strip().lower():
                 if verify_password(password_input, user["password_hash"]):
                     st.session_state["logged_in"] = True
                     st.session_state["username"] = user["username"]
+                    st.success("ログイン成功！")
                     return
                 else:
                     st.warning("パスワードが違います")
                     return
         st.warning("ユーザーが見つかりません")
-
 
 # ログイン済みダッシュボード
 def show_main_dashboard():
