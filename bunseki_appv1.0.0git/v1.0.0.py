@@ -8,53 +8,34 @@ from datetime import datetime
 import json
 import re
 import bcrypt
-import matplotlib.font_manager as fm # フォントマネージャーをインポート
+import matplotlib.font_manager as fm  # フォントマネージャーをインポート
 
 # matplotlibのフォント設定
-# 負の記号が文字化けするのを防ぐ
-plt.rcParams['axes.unicode_minus'] = False
+plt.rcParams['axes.unicode_minus'] = False  # 負の記号が文字化けするのを防ぐ
 
 # 日本語フォントの設定をより堅牢にする
 japanese_font_available = False
-font_prop = None # font_prop を初期化
+font_prop = None  # font_prop を初期化
 
-# 1. Noto Sans CJK JP を試す (Streamlit Cloudでよく利用可能)
 try:
-    noto_sans_path = fm.findfont('Noto Sans CJK JP', fallback_to_default=False)
-    font_prop = fm.FontProperties(fname=noto_sans_path)
-    plt.rcParams['font.family'] = 'Noto Sans CJK JP'
+    font_path = "static/NotoSansJP-Regular.otf"
+    font_prop = fm.FontProperties(fname=font_path)
     japanese_font_available = True
-    st.info("日本語フォント 'Noto Sans CJK JP' を使用します。")
-except Exception:
-    # 2. IPAexGothic を試す
-    try:
-        ipaex_gothic_path = fm.findfont('IPAexGothic', fallback_to_default=False)
-        font_prop = fm.FontProperties(fname=ipaex_gothic_path)
-        plt.rcParams['font.family'] = 'IPAexGothic'
-        japanese_font_available = True
-        st.info("日本語フォント 'IPAexGothic' を使用します。")
-    except Exception:
-        # 3. どちらも見つからなかった場合のフォールバック
-        st.warning("日本語フォントが見つかりませんでした。グラフのラベルは英語で表示されるか、デフォルトフォントで表示されます。")
-        # デフォルトのsans-serifフォントを設定
-        plt.rcParams['font.family'] = 'sans-serif'
-        # font_prop も 'sans-serif' ファミリーで初期化
-        font_prop = fm.FontProperties(family='sans-serif')
+    st.info("日本語フォント 'NotoSansJP-Regular.otf' を使用します。")
+except Exception as e:
+    st.warning(f"日本語フォントが読み込めませんでした: {e}")
+    font_prop = None  # フォント指定なしで描画（英語表示など）
 
-# 全体的なフォントサイズを設定（必要に応じて調整）
+# グラフ全体のフォントサイズ（必要なら調整）
 plt.rcParams['font.size'] = 10
 
-# Helper function for localization (UI elements always in Japanese)
+# UIテキストは常に日本語
 def get_localized_text(jp_text, en_text):
     return jp_text
 
-# Helper function for graph localization (graphs switch to English if Japanese font not available)
+# グラフテキストは日本語フォントがあれば日本語、なければ英語
 def get_graph_text(jp_text, en_text):
-    if japanese_font_available:
-        return jp_text
-    else:
-        return en_text
-
+    return jp_text if japanese_font_available else en_text
 
 # ページ設定
 st.set_page_config(page_title=get_localized_text("VRイベント分析ツール", "VR Event Analysis Tool"), layout="wide")
