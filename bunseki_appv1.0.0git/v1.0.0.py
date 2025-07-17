@@ -45,13 +45,12 @@ def show_main_dashboard():
     st.write(f"こんにちは、{st.session_state.get('username')} さん！")
 
     if st.button("ログアウト"):
-        # 安全にログアウト処理
-        st.session_state.pop("logged_in", None)
-        st.session_state.pop("username", None)
-        st.session_state.pop("username_input", None)
-        st.session_state.pop("password_input", None)
-        st.experimental_rerun()
+        # 安全なログアウト処理（個別にキー削除）
+        for key in ["logged_in", "username", "username_input", "password_input"]:
+            st.session_state.pop(key, None)
 
+        # rerun せず return（処理中断）
+        return
 
 # メイン関数
 def main():
