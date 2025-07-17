@@ -276,6 +276,11 @@ def show_main_app():
 
             # 👥 担当チームフィルター
             if '担当チーム' in df_filtered.columns:
+                # 全角スペースや区切り記号を統一して分解
+                df["担当チーム"] = df["担当チーム"].astype(str).str.replace('　', ' ', regex=False)
+                df["担当チーム"] = df["担当チーム"].str.split(r'[・,/／　 ]+')
+                df = df.explode("担当チーム").reset_index(drop=True)
+                df["担当チーム"] = df["担当チーム"].str.strip()
                 teams = sorted(df_filtered['担当チーム'].dropna().unique().tolist())  # 必ず list 化！
 
                 # 安全に取得（list じゃなかったら初期化）
