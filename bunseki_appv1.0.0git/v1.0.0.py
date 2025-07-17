@@ -15,21 +15,24 @@ import os
 plt.rcParams['axes.unicode_minus'] = False
 plt.rcParams['font.size'] = 10
 
-# 日本語フォントの設定
+# フォントファイルのパス
 font_path = "bunseki_appv1.0.0git/static/NotoSansJP-VariableFont_wght.otf"
-font_prop = None
-japanese_font_available = False
 
+# フォント読み込みチェック
 if os.path.exists(font_path):
-    try:
-        font_prop = fm.FontProperties(fname=font_path)
-        plt.rcParams['font.family'] = font_prop.get_name()
-        japanese_font_available = True
-        st.info("日本語フォントを使用します。")
-    except Exception as e:
-        st.warning(f"フォント読み込みに失敗しました: {e}")
+    font_prop = fm.FontProperties(fname=font_path)
+    font_name = font_prop.get_name()
+    plt.rcParams['font.family'] = font_name  # ← matplotlib 全体に強制反映！
+    japanese_font_available = True
+    st.info(f"日本語フォント '{font_name}' を使用します。")
 else:
-    st.warning("指定されたフォントファイルが見つかりません。")
+    font_prop = None
+    japanese_font_available = False
+    st.warning("日本語フォントが見つかりませんでした。グラフのラベルが文字化けする可能性があります。")
+
+# matplotlib のマイナス記号文字化け対策
+plt.rcParams['axes.unicode_minus'] = False
+plt.rcParams['font.size'] = 10
 
 # UIテキストは常に日本語
 def get_localized_text(jp_text, en_text):
