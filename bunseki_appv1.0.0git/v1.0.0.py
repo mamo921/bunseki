@@ -8,10 +8,33 @@ from datetime import datetime
 import json
 import re
 import bcrypt
+import matplotlib.font_manager as fm # フォントマネージャーをインポート
 
 # matplotlibのフォント設定
-plt.rcParams['font.family'] = 'sans-serif'
-plt.rcParams['font.sans-serif'] = ['IPAexGothic', 'Noto Sans CJK JP', 'MS Gothic', 'Yu Gothic', 'Meiryo']
+# 日本語フォントのリストを定義
+japanese_fonts = ['IPAexGothic', 'Noto Sans CJK JP', 'Yu Gothic', 'Meiryo', 'MS Gothic']
+found_japanese_font = False
+
+# 利用可能な日本語フォントを検索し、設定
+for font in japanese_fonts:
+    if fm.findfont(font, fonthandler=fm.FontManager(), rebuild_if_missing=False):
+        plt.rcParams['font.family'] = font
+        plt.rcParams['font.sans-serif'] = [font] # sans-serifにも設定
+        found_japanese_font = True
+        break
+
+if not found_japanese_font:
+    st.warning("日本語フォントが見つかりませんでした。グラフの日本語が正しく表示されない可能性があります。")
+    # フォントが見つからない場合のフォールバック（既存のsans-serif設定を維持）
+    plt.rcParams['font.family'] = 'sans-serif'
+    plt.rcParams['font.sans-serif'] = ['IPAexGothic', 'Noto Sans CJK JP', 'MS Gothic', 'Yu Gothic', 'Meiryo']
+
+
+# 負の記号が文字化けするのを防ぐ
+plt.rcParams['axes.unicode_minus'] = False
+# 全体的なフォントサイズを設定（必要に応じて調整）
+plt.rcParams['font.size'] = 10
+
 
 # ページ設定
 st.set_page_config(page_title="VRイベント分析ツール", layout="wide")
@@ -217,7 +240,7 @@ def show_main_app():
         else:
             st.info("データをアップロードしてください")
 
-    tabs = st.tabs(["📊 データ管理", "📈 分析・比較", "📊 クロス集計", "� ヒートマップ", "📉 時系列", "🏆 ランキング", "📋 自動レポート"])
+    tabs = st.tabs(["📊 データ管理", "📈 分析・比較", "📊 クロス集計", "🕒 ヒートマップ", "📉 時系列", "🏆 ランキング", "📋 自動レポート"])
 
     with tabs[0]:
         st.header("📁 分析対象CSVファイルのアップロード")
@@ -468,7 +491,7 @@ def show_main_app():
                     grouped_df = pd.DataFrame()
 
                 if not grouped_df.empty:
-                    st.markdown("### 📊 グループ別集計結果")
+                    st.markdown("### � グループ別集計結果")
                     st.dataframe(grouped_df.round(2), use_container_width=True)
 
                     if selected_aggs:
@@ -1064,7 +1087,7 @@ def show_main_app():
                 else:
                     corr_summary_text.append("「リアクション率」と「参加者数」の相関は計算できませんでした（データ不足または定数）。")
             else:
-                corr_summary_text.append("「リアクション率」の列が見つかりませんでした。")
+                st.info("「リアクション率」の列が見つかりませんでした。")
             
             for line in corr_summary_text:
                 st.info(line)
