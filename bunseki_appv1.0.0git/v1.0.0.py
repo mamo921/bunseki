@@ -18,25 +18,32 @@ def load_users_from_secrets():
 
 # ログインフォームを表示
 def login_form():
-    st.sidebar.title("ログイン")
-    st.sidebar.text_input("ユーザー名", key="username_input")
-    st.sidebar.text_input("パスワード", type="password", key="password_input")
+    st.title("ログイン")
 
-    username_input = st.session_state.get("username_input", "").strip().lower()
-    password_input = st.session_state.get("password_input", "")
+    # フォーム使えばEnterキーでログインできる！
+    with st.form("login_form"):
+        st.text_input("ユーザー名", key="username_input")
+        st.text_input("パスワード", type="password", key="password_input")
+        submitted = st.form_submit_button("ログイン")
 
-    if st.sidebar.button("ログイン"):
-        for user in load_users_from_secrets():
+    if submitted:
+        username_input = st.session_state.get("username_input", "").strip().lower()
+        password_input = st.session_state.get("password_input", "")
+
+        st.write("デバッグ: 入力されたユーザー名:", username_input)
+        st.write("デバッグ: 入力されたパスワード（ハッシュ化前）:", password_input)
+
+        users = load_users_from_secrets()
+        for user in users:
             if user["username"].lower() == username_input:
                 if verify_password(password_input, user["password_hash"]):
-                    # rerunせずにそのまま状態更新
                     st.session_state["logged_in"] = True
                     st.session_state["username"] = user["username"]
-                    return  # ★ rerunしないで return！
+                    return
                 else:
-                    st.sidebar.error("パスワードが違います")
-                return
-        st.sidebar.error("ユーザーが見つかりません")
+                    st.warning("パスワードが違います")
+                    return
+        st.warning("ユーザーが見つかりません")
 
 
 # ログイン済みダッシュボード
