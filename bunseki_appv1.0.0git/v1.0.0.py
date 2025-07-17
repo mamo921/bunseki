@@ -46,16 +46,15 @@ plt.rcParams['axes.unicode_minus'] = False
 plt.rcParams['font.size'] = 10
 
 # UIテキストは常に日本語
-def get_localized_text(jp_text, en_text):
+def get_localized_text(jp_text): # 英語引数を削除
     return jp_text
 
 # グラフテキストは日本語フォントがあれば日本語、なければ英語
-def get_graph_text(jp_text, en_text):
-    return jp_text if japanese_font_available else en_text
-
+def get_graph_text(jp_text): # 英語引数を削除
+    return jp_text if japanese_font_available else "" # 日本語フォントがない場合、空文字列を返す
 
 # ページ設定
-st.set_page_config(page_title=get_localized_text("VRイベント分析ツール", "VR Event Analysis Tool"), layout="wide")
+st.set_page_config(page_title=get_localized_text("VRイベント分析ツール"), layout="wide")
 
 # --- 認証関連の関数 ---
 # パスワードの検証
@@ -72,20 +71,20 @@ def load_users_from_secrets():
                 user = json.loads(user)
             users.append(user)
     except Exception as e:
-        st.error(get_localized_text(f"ユーザー情報の読み込みに失敗しました: {e}", f"Failed to load user information: {e}"))
+        st.error(get_localized_text(f"ユーザー情報の読み込みに失敗しました: {e}"))
         st.stop()
     return users
 
 # ログインフォームの表示
 def login_form():
-    st.subheader(get_localized_text("ログイン", "Login"))
+    st.subheader(get_localized_text("ログイン"))
 
     user_data = load_users_from_secrets()
 
     with st.form("login_form"):
-        username_input = st.text_input(get_localized_text("ユーザー名", "Username"))
-        password_input = st.text_input(get_localized_text("パスワード", "Password"), type="password")
-        submitted = st.form_submit_button(get_localized_text("ログイン", "Login"))
+        username_input = st.text_input(get_localized_text("ユーザー名"))
+        password_input = st.text_input(get_localized_text("パスワード"), type="password")
+        submitted = st.form_submit_button(get_localized_text("ログイン"))
 
     if submitted:
         found_user = False
@@ -95,13 +94,13 @@ def login_form():
                 if verify_password(password_input, user["password_hash"]):
                     st.session_state["logged_in"] = True
                     st.session_state["username"] = user["username"]
-                    st.success(get_localized_text("ログイン成功！", "Login successful!"))
+                    st.success(get_localized_text("ログイン成功！"))
                     st.rerun()
                 else:
-                    st.error(get_localized_text("パスワードが違います。", "Incorrect password."))
+                    st.error(get_localized_text("パスワードが違います。"))
                 break
         if not found_user:
-            st.error(get_localized_text("ユーザーが見つかりません。", "User not found."))
+            st.error(get_localized_text("ユーザーが見つかりません。"))
 
 def show_main_app():
     df = st.session_state.get("current_data", None)
@@ -158,9 +157,9 @@ class DataProcessor:
                 )
                 return df, None
             except Exception as e:
-                return None, get_localized_text(f"読み込みエラー: {str(e)}", f"Read error: {str(e)}")
+                return None, get_localized_text(f"読み込みエラー: {str(e)}")
         except Exception as e:
-            return None, get_localized_text(f"読み込みエラー: {str(e)}", f"Read error: {str(e)}")
+            return None, get_localized_text(f"読み込みエラー: {str(e)}")
 
     @staticmethod
     def process_dataframe(df):
@@ -180,8 +179,7 @@ class DataProcessor:
                 newly_coerced_nan_percentage = (nan_after_coerce - initial_nan_count) / len(df) * 100
                 if newly_coerced_nan_percentage > 10: # 例えば10%以上の値が無効になった場合に警告
                     st.warning(get_localized_text(
-                        f"「実施日」列の{newly_coerced_nan_percentage:.1f}%が日付として認識できませんでした。元のデータ形式を確認してください。",
-                        f"{newly_coerced_nan_percentage:.1f}% of '実施日' column could not be recognized as dates. Please check the original data format."
+                        f"「実施日」列の{newly_coerced_nan_percentage:.1f}%が日付として認識できませんでした。元のデータ形式を確認してください。"
                     ))
 
         numeric_cols = ['申込数', '参加者数', 'リアクション数', '宣伝回数', '満足回答']
@@ -222,12 +220,12 @@ def show_main_app():
     # </style>
     # """, unsafe_allow_html=True)
 
-    st.title(get_localized_text("VRイベント分析アプリ", "VR Event Analysis App"))
+    st.title(get_localized_text("VRイベント分析アプリ"))
 
     SessionManager.initialize()
 
     with st.sidebar:
-        st.markdown(get_localized_text("## 🔍 フィルター設定", "## 🔍 Filter Settings"))
+        st.markdown(get_localized_text("## 🔍 フィルター設定"))
         st.markdown("---")
 
         dfmain_for_sidebar = st.session_state.get('dfmain')
@@ -245,7 +243,7 @@ def show_main_app():
                     initial_selected_teams = teams
                 
                 selected_teams = st.multiselect(
-                    get_localized_text("👥 担当チーム", "👥 Responsible Teams"), 
+                    get_localized_text("👥 担当チーム"), 
                     teams, 
                     default=[t for t in initial_selected_teams if t in teams] # 存在しないチームがdefaultに含まれないようにフィルタ
                 )
@@ -253,7 +251,7 @@ def show_main_app():
 
                 # 担当チームが何も選択されていない場合の動作変更
                 if len(selected_teams) == 0:
-                    st.warning(get_localized_text("担当チームが選択されていません。全ての担当チームのデータが表示されます。", "No teams selected. Data for all teams will be displayed."))
+                    st.warning(get_localized_text("担当チームが選択されていません。全ての担当チームのデータが表示されます。"))
                     # df_filtered はこのブロックに入る前の状態（dfmain_for_sidebar）のまま使用
                 else:
                     df_filtered = df_filtered[df_filtered['担当チーム'].isin(selected_teams)]
@@ -267,7 +265,7 @@ def show_main_app():
                     max_date = max(valid_dates)
                     
                     default_date_range = [min_date, max_date] if min_date <= max_date else [min_date, min_date]
-                    date_range = st.date_input(get_localized_text("📅 実施日の範囲", "📅 Date Range"), value=default_date_range)
+                    date_range = st.date_input(get_localized_text("📅 実施日の範囲"), value=default_date_range)
                     
                     if isinstance(date_range, (list, tuple)) and len(date_range) == 2:
                         start, end = date_range[0], date_range[1]
@@ -276,21 +274,21 @@ def show_main_app():
                             (df_filtered['実施日'] <= end)
                         ]
                 else:
-                    st.warning(get_localized_text("日付データがありません。", "No date data available."))
+                    st.warning(get_localized_text("日付データがありません。"))
             
             st.session_state.current_data = df_filtered
 
         else:
-            st.info(get_localized_text("データをアップロードしてください", "Please upload data."))
+            st.info(get_localized_text("データをアップロードしてください"))
 
     tabs = st.tabs([
-        get_localized_text("📊 データ管理", "📊 Data Management"),
-        get_localized_text("📈 分析・比較", "📈 Analysis & Comparison"),
-        get_localized_text("📊 クロス集計", "📊 Cross Tabulation"),
-        get_localized_text("🕒 ヒートマップ", "🕒 Heatmap"),
-        get_localized_text("📉 時系列", "📉 Time Series"),
-        get_localized_text("🏆 ランキング", "🏆 Ranking"),
-        get_localized_text("📋 自動レポート", "📋 Automatic Report")
+        get_localized_text("📊 データ管理"),
+        get_localized_text("📈 分析・比較"),
+        get_localized_text("📊 クロス集計"),
+        get_localized_text("🕒 ヒートマップ"),
+        get_localized_text("📉 時系列"),
+        get_localized_text("🏆 ランキング"),
+        get_localized_text("📋 自動レポート")
     ])
 
     title_font = {
@@ -299,7 +297,7 @@ def show_main_app():
     }
 
     with tabs[0]:
-        st.header(get_localized_text("📁 分析対象CSVファイルのアップロード", "📁 Upload CSV File for Analysis"))
+        st.header(get_localized_text("📁 分析対象CSVファイルのアップロード"))
         
         col1, col2 = st.columns([2, 1])
         with col1:
@@ -308,7 +306,7 @@ def show_main_app():
             last_uploaded_idx = -1 
 
             for i in range(st.session_state.num_uploaders):
-                label = get_localized_text("CSVファイル (必須)", "CSV File (Required)") if i == 0 else get_localized_text(f"追加のCSVファイル (オプション {i})", f"Additional CSV File (Optional {i})")
+                label = get_localized_text("CSVファイル (必須)") if i == 0 else get_localized_text(f"追加のCSVファイル (オプション {i})")
                 file_obj = st.file_uploader(
                     label,
                     type="csv",
@@ -354,7 +352,7 @@ def show_main_app():
                     f.seek(0)
                     df_t, error = DataProcessor.safe_read_csv(f)
                     if error:
-                        st.error(get_localized_text(f"ファイル {f.name}: {error}", f"File {f.name}: {error}"))
+                        st.error(get_localized_text(f"ファイル {f.name}: {error}"))
                     else:
                         df_t = DataProcessor.process_dataframe(df_t)
                         if df_t is not None:
@@ -378,9 +376,7 @@ def show_main_app():
                         st.warning(get_localized_text(
                             f"以下の数値列で高い欠損率が検出されました: {', '.join(high_nan_cols)}。\n"
                             "これは、元のCSVファイルの該当列に数値以外のデータが多く含まれている可能性があります。"
-                            "データの正確性を確認してください。",
-                            f"High missing values detected in the following numeric columns: {', '.join(high_nan_cols)}.\n"
-                            "This may indicate that the original CSV file contains non-numeric data in these columns. Please verify data accuracy."
+                            "データの正確性を確認してください。"
                         ))
                 else:
                     st.session_state['dfmain'] = None
@@ -389,18 +385,18 @@ def show_main_app():
             
         df_display = st.session_state.get('current_data')
         if df_display is None or df_display.empty:
-            st.warning(get_localized_text("データがアップロードされていないか、フィルターによってデータがありません。", "No data uploaded or no data after filtering."))
+            st.warning(get_localized_text("データがアップロードされていないか、フィルターによってデータがありません。"))
         else:
             if st.session_state.upload_files:
                 with col2:
-                    st.markdown(get_localized_text("### 📊 ファイル情報", "### 📊 File Information"))
+                    st.markdown(get_localized_text("### 📊 ファイル情報"))
                     for i, f in enumerate(all_uploaded_files_current_run, 1):
                         if f is not None:
-                            display_name = f.name if hasattr(f, 'name') else get_localized_text(f"ファイル {i}", f"File {i}")
-                            st.info(get_localized_text(f"ファイル {i}: {display_name}", f"File {i}: {display_name}"))
+                            display_name = f.name if hasattr(f, 'name') else get_localized_text(f"ファイル {i}")
+                            st.info(get_localized_text(f"ファイル {i}: {display_name}"))
 
                 if len(st.session_state.upload_files) > 1: 
-                    st.markdown(get_localized_text("### 🔄 データ統合結果", "### 🔄 Data Integration Result"))
+                    st.markdown(get_localized_text("### 🔄 データ統合結果"))
                     total_rows_before = 0
                     for f in st.session_state.upload_files:
                         f.seek(0)
@@ -410,23 +406,22 @@ def show_main_app():
                     
                     col1, col2, col3 = st.columns(3)
                     with col1:
-                        st.metric(get_localized_text("アップロードされた全てのデータ数", "Total Uploaded Rows"), f"{total_rows_before}{get_localized_text('行', ' rows')}")
+                        st.metric(get_localized_text("アップロードされた全てのデータ数"), f"{total_rows_before}{get_localized_text('行')}")
                     with col2:
-                        st.metric(get_localized_text("統合後のデータ数", "Total Integrated Rows"), f"{len(df_display)}{get_localized_text('行', ' rows')}")
+                        st.metric(get_localized_text("統合後のデータ数"), f"{len(df_display)}{get_localized_text('行')}")
                     with col3:
                         removed_rows = total_rows_before - len(df_display)
                         if removed_rows > 0:
-                            st.metric(get_localized_text("重複削除", "Duplicates Removed"), f"{removed_rows}{get_localized_text('行', ' rows')}")
+                            st.metric(get_localized_text("重複削除"), f"{removed_rows}{get_localized_text('行')}")
                             st.info(get_localized_text(
-                                f"※ {removed_rows}行の重複（全ての列が完全に一致する行）を削除しました。",
-                                f"※ {removed_rows} duplicate rows (all columns perfectly matching) were removed."
+                                f"※ {removed_rows}行の重複（全ての列が完全に一致する行）を削除しました。"
                             ))
                 else:
-                    st.info(get_localized_text(f"単一ファイル（{len(df_display)}行）を処理します", f"Processing single file ({len(df_display)} rows)"))
+                    st.info(get_localized_text(f"単一ファイル（{len(df_display)}行）を処理します"))
 
-            st.markdown(get_localized_text("### 📋 データプレビュー", "### 📋 Data Preview"))
+            st.markdown(get_localized_text("### 📋 データプレビュー"))
             preview_rows = st.number_input(
-                get_localized_text("表示する行数（0で全行表示）", "Number of rows to display (0 for all)"),
+                get_localized_text("表示する行数（0で全行表示）"),
                 min_value=0,
                 max_value=len(df_display),
                 value=5
@@ -437,39 +432,39 @@ def show_main_app():
             else:
                 st.dataframe(df_display.head(preview_rows), use_container_width=True)
 
-            st.markdown(get_localized_text("### 📋 列情報", "### 📋 Column Information"))
+            st.markdown(get_localized_text("### 📋 列情報"))
             col_info = pd.DataFrame({
-                get_localized_text('データ型', 'Data Type'): df_display.dtypes,
-                get_localized_text('欠損値数', 'Missing Count'): df_display.isnull().sum(),
-                get_localized_text('欠損率(%)', 'Missing Rate (%)'): (df_display.isnull().sum() / len(df_display) * 100).round(2),
-                get_localized_text('ユニーク値数', 'Unique Count'): df_display.nunique(),
+                get_localized_text('データ型'): df_display.dtypes,
+                get_localized_text('欠損値数'): df_display.isnull().sum(),
+                get_localized_text('欠損率(%)'): (df_display.isnull().sum() / len(df_display) * 100).round(2),
+                get_localized_text('ユニーク値数'): df_display.nunique(),
             })
             st.dataframe(col_info)
 
-            st.markdown(get_localized_text("### 📊 基本統計量", "### 📊 Basic Statistics"))
+            st.markdown(get_localized_text("### 📊 基本統計量"))
             numeric_cols = df_display.select_dtypes(include=['int64', 'float64']).columns
             if not numeric_cols.empty:
                 stats_df = df_display[numeric_cols].describe().T
 
                 rename_map = {
-                    "count": get_localized_text("データ数", "Count"),
-                    "mean": get_localized_text("平均", "Mean"),
-                    "std": get_localized_text("標準偏差", "Std Dev"),
-                    "min": get_localized_text("最小値", "Min"),
+                    "count": get_localized_text("データ数"),
+                    "mean": get_localized_text("平均"),
+                    "std": get_localized_text("標準偏差"),
+                    "min": get_localized_text("最小値"),
                     "25%": "25%",
-                    "50%": get_localized_text("中央値", "Median"),
+                    "50%": get_localized_text("中央値"),
                     "75%": "75%",
-                    "max": get_localized_text("最大値", "Max")
+                    "max": get_localized_text("最大値")
                 }
 
                 stats_df = stats_df.rename(columns=rename_map)
                 st.dataframe(stats_df)
 
 
-            st.markdown(get_localized_text("### 📊 カテゴリ列の内訳", "### 📊 Category Column Breakdown"))
+            st.markdown(get_localized_text("### 📊 カテゴリ列の内訳"))
             category_cols = df_display.select_dtypes(include=['object']).columns
             if not category_cols.empty:
-                selected_col = st.selectbox(get_localized_text("確認する列を選択", "Select column to check"), category_cols)
+                selected_col = st.selectbox(get_localized_text("確認する列を選択"), category_cols)
                 value_counts = df_display[selected_col].value_counts()
 
                 fig, ax = plt.subplots()
@@ -493,9 +488,9 @@ def show_main_app():
                     label.set_fontproperties(font_prop)
 
                 # タイトル・軸ラベル
-                ax.set_title(get_graph_text(f"{selected_col}の値カウント", f"Value Counts of {selected_col}"), fontproperties=font_prop, **title_font)
-                ax.set_xlabel(get_graph_text(selected_col, selected_col), fontproperties=font_prop)
-                ax.set_ylabel(get_graph_text("カウント", "Count"), fontproperties=font_prop)
+                ax.set_title(get_graph_text(f"{selected_col}の値カウント"), fontproperties=font_prop, **title_font)
+                ax.set_xlabel(get_graph_text(selected_col), fontproperties=font_prop)
+                ax.set_ylabel(get_graph_text("カウント"), fontproperties=font_prop)
 
                 # ✅ x軸のTickラベルを完全に再描画する
                 xtick_labels = [tick.get_text() for tick in ax.get_xticklabels()]
@@ -521,7 +516,7 @@ def show_main_app():
                 st.pyplot(fig)
 
     with tabs[1]:
-        st.header(get_localized_text("📈 分析・比較", "📈 Analysis & Comparison"))
+        st.header(get_localized_text("📈 分析・比較"))
         
         if 'current_data' in st.session_state and st.session_state.current_data is not None and not st.session_state.current_data.empty:
             df = st.session_state.current_data.copy()
@@ -532,30 +527,30 @@ def show_main_app():
                 cat_cols = df.select_dtypes(include='object').columns.tolist()
                 
                 if not num_cols:
-                    st.warning(get_localized_text("数値列がありません。", "No numeric columns found."))
+                    st.warning(get_localized_text("数値列がありません。"))
                     st.stop()
                 if not cat_cols:
-                    st.warning(get_localized_text("カテゴリ列がありません。", "No categorical columns found."))
+                    st.warning(get_localized_text("カテゴリ列がありません。"))
                     st.stop()
 
-                target_num = st.selectbox(get_localized_text("分析対象（数値）", "Analysis Target (Numeric)"), num_cols)
-                group_col = st.selectbox(get_localized_text("グループ化（カテゴリ）", "Group By (Category)"), cat_cols)
+                target_num = st.selectbox(get_localized_text("分析対象（数値）"), num_cols)
+                group_col = st.selectbox(get_localized_text("グループ化（カテゴリ）"), cat_cols)
 
             with col2:
                 agg_options = [
-                    get_localized_text('平均', 'Mean'),
-                    get_localized_text('合計', 'Sum'),
-                    get_localized_text('中央値', 'Median'),
-                    get_localized_text('最大', 'Max'),
-                    get_localized_text('最小', 'Min'),
-                    get_localized_text('データ数', 'Count')
+                    get_localized_text('平均'),
+                    get_localized_text('合計'),
+                    get_localized_text('中央値'),
+                    get_localized_text('最大'),
+                    get_localized_text('最小'),
+                    get_localized_text('データ数')
                 ]
                 selected_aggs_display = st.multiselect(
-                    get_localized_text("表示する統計指標", "Select Statistical Metrics to Display"),
+                    get_localized_text("表示する統計指標"),
                     agg_options,
                     default=agg_options
                 )
-                exclude_outliers = st.checkbox(get_localized_text("外れ値を除外", "Exclude Outliers"))
+                exclude_outliers = st.checkbox(get_localized_text("外れ値を除外"))
 
             try:
                 analysis_df = df.copy()
@@ -566,18 +561,17 @@ def show_main_app():
                     analysis_df = analysis_df[z_scores < 3]
                 elif exclude_outliers: # std=0の場合
                     st.info(get_localized_text(
-                        f"'{target_num}'のデータにばらつきがないため、外れ値除外は適用されませんでした。",
-                        f"Outlier exclusion was not applied as '{target_num}' data has no variance."
+                        f"'{target_num}'のデータにばらつきがないため、外れ値除外は適用されませんでした。"
                     ))
 
 
                 agg_map_internal = {
-                    get_localized_text('平均', 'Mean'): 'mean',
-                    get_localized_text('合計', 'Sum'): 'sum',
-                    get_localized_text('中央値', 'Median'): 'median',
-                    get_localized_text('最大', 'Max'): 'max',
-                    get_localized_text('最小', 'Min'): 'min',
-                    get_localized_text('データ数', 'Count'): 'count'
+                    get_localized_text('平均'): 'mean',
+                    get_localized_text('合計'): 'sum',
+                    get_localized_text('中央値'): 'median',
+                    get_localized_text('最大'): 'max',
+                    get_localized_text('最小'): 'min',
+                    get_localized_text('データ数'): 'count'
                 }
                 
                 agg_funcs_list = [agg_map_internal[a] for a in selected_aggs_display if a in agg_map_internal] 
@@ -590,15 +584,15 @@ def show_main_app():
                     grouped_df.rename(columns=rename_dict, inplace=True)
 
                 else:
-                    st.error(get_localized_text("選択された列がデータフレームに存在しません。", "Selected columns do not exist in the dataframe."))
+                    st.error(get_localized_text("選択された列がデータフレームに存在しません。"))
                     grouped_df = pd.DataFrame()
 
                 if not grouped_df.empty:
-                    st.markdown(get_localized_text("### 📊 グループ別集計結果", "### 📊 Grouped Aggregation Results"))
+                    st.markdown(get_localized_text("### 📊 グループ別集計結果"))
                     st.dataframe(grouped_df.round(2), use_container_width=True)
 
                     if selected_aggs_display:
-                        st.markdown(get_localized_text("### 📈 統計指標別グラフ", "### 📈 Graphs by Statistical Metric"))
+                        st.markdown(get_localized_text("### 📈 統計指標別グラフ"))
                         cols = st.columns(2)
                         for i, metric_display_name in enumerate(selected_aggs_display):
                             col_name_for_plot = f"{target_num}_{metric_display_name}" 
@@ -612,8 +606,8 @@ def show_main_app():
 
                                     grouped_df[col_name_for_plot].plot(kind='bar', ax=ax)
                                     # Apply font_prop to title, labels, and ticks
-                                    ax.set_ylabel(get_graph_text(f"{target_num}の{metric_display_name}", f"{metric_display_name} of {target_num}"), fontproperties=font_prop)
-                                    ax.set_title(get_graph_text(f"{group_col}ごとの{target_num}（{metric_display_name}）", f"{metric_display_name} of {target_num} by {group_col}"), fontproperties=font_prop)
+                                    ax.set_ylabel(get_graph_text(f"{target_num}の{metric_display_name}"), fontproperties=font_prop)
+                                    ax.set_title(get_graph_text(f"{group_col}ごとの{target_num}（{metric_display_name}）"), fontproperties=font_prop)
                                     for label in ax.get_xticklabels():
                                         label.set_fontproperties(font_prop)
                                     for label in ax.get_yticklabels():
@@ -625,21 +619,21 @@ def show_main_app():
                                     buf = io.BytesIO()
                                     fig.savefig(buf, format='png')
                                     st.download_button(
-                                        get_localized_text(f"📥 {metric_display_name}のグラフを保存", f"📥 Save {metric_display_name} Graph"),
+                                        get_localized_text(f"📥 {metric_display_name}のグラフを保存"),
                                         buf.getvalue(),
                                         f"analysis_{metric_display_name}.png",
                                         "image/png"
                                     )
                 else:
-                    st.warning(get_localized_text("集計結果がありません。フィルター設定またはデータを確認してください。", "No aggregation results. Please check filter settings or data."))
+                    st.warning(get_localized_text("集計結果がありません。フィルター設定またはデータを確認してください。"))
 
             except Exception as e:
-                st.error(get_localized_text(f"分析エラー: {e}", f"Analysis error: {e}"))
+                st.error(get_localized_text(f"分析エラー: {e}"))
         else:
-            st.warning(get_localized_text("データがアップロードされていないか、フィルターによってデータがありません。データ管理タブでファイルをアップロードしてください。", "No data uploaded or no data after filtering. Please upload files in the Data Management tab."))
+            st.warning(get_localized_text("データがアップロードされていないか、フィルターによってデータがありません。データ管理タブでファイルをアップロードしてください。"))
 
     with tabs[2]:
-        st.header(get_localized_text("📊 クロス集計", "📊 Cross Tabulation"))
+        st.header(get_localized_text("📊 クロス集計"))
 
         if 'current_data' in st.session_state and st.session_state.current_data is not None and not st.session_state.current_data.empty:
             df = st.session_state.current_data.copy()
@@ -648,38 +642,38 @@ def show_main_app():
             num_cols = df.select_dtypes(include='number').columns.tolist()
 
             if len(cat_cols) < 2:
-                st.warning(get_localized_text("クロス集計には2つ以上のカテゴリ列が必要です。", "Cross tabulation requires at least two categorical columns."))
+                st.warning(get_localized_text("クロス集計には2つ以上のカテゴリ列が必要です。"))
                 st.stop()
             if not num_cols:
-                st.warning(get_localized_text("数値列がありません。", "No numeric columns found."))
+                st.warning(get_localized_text("数値列がありません。"))
                 st.stop()
 
-            col1 = st.selectbox(get_localized_text("行カテゴリ", "Row Category"), cat_cols, key="cross_row")
+            col1 = st.selectbox(get_localized_text("行カテゴリ"), cat_cols, key="cross_row")
             col2_options = [c for c in cat_cols if c != col1]
             if not col2_options:
-                st.warning(get_localized_text(f"'{col1}' 以外のカテゴリ列がありません。", f"No categorical columns other than '{col1}' found."))
+                st.warning(get_localized_text(f"'{col1}' 以外のカテゴリ列がありません。"))
                 st.stop()
-            col2 = st.selectbox(get_localized_text("列カテゴリ", "Column Category"), col2_options, key="cross_col")
+            col2 = st.selectbox(get_localized_text("列カテゴリ"), col2_options, key="cross_col")
             
-            num_col = st.selectbox(get_localized_text("数値項目", "Numeric Item"), num_cols, key="cross_num")
-            agg_method_display = st.selectbox(get_localized_text("集計方法", "Aggregation Method"), [
-                get_localized_text('平均', 'Mean'),
-                get_localized_text('合計', 'Sum'),
-                get_localized_text('中央値', 'Median'),
-                get_localized_text('最大', 'Max'),
-                get_localized_text('最小', 'Min'),
-                get_localized_text('データ数', 'Count')
+            num_col = st.selectbox(get_localized_text("数値項目"), num_cols, key="cross_num")
+            agg_method_display = st.selectbox(get_localized_text("集計方法"), [
+                get_localized_text('平均'),
+                get_localized_text('合計'),
+                get_localized_text('中央値'),
+                get_localized_text('最大'),
+                get_localized_text('最小'),
+                get_localized_text('データ数')
             ], key="cross_agg")
 
-            if st.button(get_localized_text("クロス集計を実行", "Execute Cross Tabulation"), key="cross_execute"):
+            if st.button(get_localized_text("クロス集計を実行"), key="cross_execute"):
                 try:
                     agg_map_internal = {
-                        get_localized_text('平均', 'Mean'): 'mean',
-                        get_localized_text('合計', 'Sum'): 'sum',
-                        get_localized_text('中央値', 'Median'): 'median',
-                        get_localized_text('最大', 'Max'): 'max',
-                        get_localized_text('最小', 'Min'): 'min',
-                        get_localized_text('データ数', 'Count'): 'count'
+                        get_localized_text('平均'): 'mean',
+                        get_localized_text('合計'): 'sum',
+                        get_localized_text('中央値'): 'median',
+                        get_localized_text('最大'): 'max',
+                        get_localized_text('最小'): 'min',
+                        get_localized_text('データ数'): 'count'
                     }
 
                     if col1 in df.columns and col2 in df.columns and num_col in df.columns:
@@ -698,8 +692,8 @@ def show_main_app():
                         fig, ax = plt.subplots(figsize=(10, 5))
                         cross_table.plot(kind='bar', ax=ax)
                         # Apply font_prop to title, labels, and ticks
-                        ax.set_ylabel(get_graph_text(num_col, num_col), fontproperties=font_prop) # Column name is fine
-                        ax.set_title(get_graph_text(f"{col1} × {col2} の {agg_method_display}", f"{agg_method_display} of {num_col} by {col1} x {col2}"), fontproperties=font_prop)
+                        ax.set_ylabel(get_graph_text(num_col), fontproperties=font_prop) # Column name is fine
+                        ax.set_title(get_graph_text(f"{col1} × {col2} の {agg_method_display}"), fontproperties=font_prop)
                         for label in ax.get_xticklabels():
                             label.set_fontproperties(font_prop)
                         for label in ax.get_yticklabels():
@@ -710,23 +704,23 @@ def show_main_app():
 
                         csv = cross_table.to_csv(encoding='utf-8-sig').encode('utf-8-sig')
                         st.download_button(
-                            get_localized_text("📥 クロス集計結果をCSVで保存", "📥 Save Cross Tabulation Result as CSV"),
+                            get_localized_text("📥 クロス集計結果をCSVで保存"),
                             csv,
                             file_name="cross_table.csv",
                             mime='text/csv',
                             key="cross_download"
                         )
                     else:
-                        st.error(get_localized_text("選択された列がデータフレームに存在しません。", "Selected columns do not exist in the dataframe."))
+                        st.error(get_localized_text("選択された列がデータフレームに存在しません。"))
 
                 except Exception as e:
-                    st.error(get_localized_text(f"クロス集計の実行に失敗しました: {e}", f"Failed to execute cross tabulation: {e}"))
+                    st.error(get_localized_text(f"クロス集計の実行に失敗しました: {e}"))
         else:
-            st.warning(get_localized_text("データがアップロードされていないか、フィルターによってデータがありません。データ管理タブでファイルをアップロードしてください。", "No data uploaded or no data after filtering. Please upload files in the Data Management tab."))
+            st.warning(get_localized_text("データがアップロードされていないか、フィルターによってデータがありません。データ管理タブでファイルをアップロードしてください。"))
 
 
     with tabs[3]:
-        st.header(get_localized_text("🟥 ヒートマップ", "🟥 Heatmap"))
+        st.header(get_localized_text("🟥 ヒートマップ"))
 
         if 'current_data' in st.session_state and st.session_state.current_data is not None and not st.session_state.current_data.empty:
             df = st.session_state.current_data.copy()
@@ -734,48 +728,48 @@ def show_main_app():
             df = DataProcessor.expand_time_slots(df)
 
             if '時間帯スロット' not in df.columns or '曜日' not in df.columns:
-                st.warning(get_localized_text("ヒートマップを作成するには「時間帯」と「曜日」の列が必要です。", "Time slot and weekday columns are required to create a heatmap."))
+                st.warning(get_localized_text("ヒートマップを作成するには「時間帯」と「曜日」の列が必要です。"))
                 st.stop()
             
             if not all(col in df.columns for col in ['時間帯スロット', '曜日']):
-                st.warning(get_localized_text("ヒートマップの作成に必要な列（時間帯スロット、曜日）がデータに存在しません。", "Required columns for heatmap (Time Slot, Weekday) do not exist in the data."))
+                st.warning(get_localized_text("ヒートマップの作成に必要な列（時間帯スロット、曜日）がデータに存在しません。"))
                 st.stop()
 
 
             numeric_cols = df.select_dtypes(include='number').columns.tolist()
             if not numeric_cols:
-                st.warning(get_localized_text("数値列がありません。ヒートマップは数値データに基づいています。", "No numeric columns found. Heatmap is based on numeric data."))
+                st.warning(get_localized_text("数値列がありません。ヒートマップは数値データに基づいています。"))
                 st.stop()
 
             col1, col2 = st.columns(2)
             with col1:
                 heat_metric = st.selectbox(
-                    get_localized_text("集計する指標", "Metric to Aggregate"),
+                    get_localized_text("集計する指標"),
                     numeric_cols,
                     key="heat_metric"
                 )
                 agg_method_display = st.selectbox(
-                    get_localized_text("集計方法", "Aggregation Method"),
-                    [get_localized_text('平均', 'Mean'), get_localized_text('合計', 'Sum'), get_localized_text('データ数', 'Count')],
+                    get_localized_text("集計方法"),
+                    [get_localized_text('平均'), get_localized_text('合計'), get_localized_text('データ数')],
                     key="heat_agg"
                 )
 
             with col2:
                 color_scale = st.selectbox(
-                    get_localized_text("カラースケール", "Color Scale"),
+                    get_localized_text("カラースケール"),
                     ['YlOrRd', 'viridis', 'coolwarm'],
                     key="heat_color"
                 )
-                normalize = st.checkbox(get_localized_text("データを正規化", "Normalize Data"), value=True, key="heat_normalize")
+                normalize = st.checkbox(get_localized_text("データを正規化"), value=True, key="heat_normalize")
 
-            if st.button(get_localized_text("ヒートマップを生成", "Generate Heatmap"), key="heat_execute"):
+            if st.button(get_localized_text("ヒートマップを生成"), key="heat_execute"):
                 try:
                     heat_df = df.copy()
 
                     agg_map_internal = {
-                        get_localized_text('平均', 'Mean'): 'mean',
-                        get_localized_text('合計', 'Sum'): 'sum',
-                        get_localized_text('データ数', 'Count'): 'count'
+                        get_localized_text('平均'): 'mean',
+                        get_localized_text('合計'): 'sum',
+                        get_localized_text('データ数'): 'count'
                     }
                     pivot_table = pd.pivot_table(
                         heat_df,
@@ -797,7 +791,7 @@ def show_main_app():
                     if normalize and not pivot_table.empty and pivot_table.std().std() > 0:
                         pivot_table = (pivot_table - pivot_table.mean().mean()) / pivot_table.std().std()
                     elif normalize and not pivot_table.empty: # 標準偏差が0の場合
-                        st.info(get_localized_text("データにばらつきがないため、ヒートマップの正規化はスキップされました。", "Heatmap normalization skipped as data has no variance."))
+                        st.info(get_localized_text("データにばらつきがないため、ヒートマップの正規化はスキップされました。"))
 
 
                     fig, ax = plt.subplots(figsize=(12, 8))
@@ -812,9 +806,9 @@ def show_main_app():
                     )
 
                     # Apply font_prop to title, labels, and ticks
-                    ax.set_title(get_graph_text(f"時間帯×曜日の{heat_metric}（{agg_method_display}）", f"{agg_method_display} of {heat_metric} by Time Slot x Weekday"), fontproperties=font_prop, fontsize=16)
-                    ax.set_xlabel(get_graph_text("曜日", "Weekday"), fontproperties=font_prop, fontsize=12)
-                    ax.set_ylabel(get_graph_text("時間帯スロット", "Time Slot"), fontproperties=font_prop, fontsize=12)
+                    ax.set_title(get_graph_text(f"時間帯×曜日の{heat_metric}（{agg_method_display}）"), fontproperties=font_prop, fontsize=16)
+                    ax.set_xlabel(get_graph_text("曜日"), fontproperties=font_prop, fontsize=12)
+                    ax.set_ylabel(get_graph_text("時間帯スロット"), fontproperties=font_prop, fontsize=12)
                     ax.set_xticklabels(ax.get_xticklabels(), fontproperties=font_prop)
                     ax.set_yticklabels(ax.get_yticklabels(), fontproperties=font_prop)
 
@@ -829,14 +823,14 @@ def show_main_app():
 
                     csv = pivot_table.to_csv(encoding='utf-8-sig').encode('utf-8-sig')
                     st.download_button(
-                        get_localized_text("📥 ヒートマップデータをCSVで保存", "📥 Save Heatmap Data as CSV"),
+                        get_localized_text("📥 ヒートマップデータをCSVで保存"),
                         csv,
                         file_name="heatmap_data.csv",
                         mime='text/csv',
                         key="heat_download"
                     )
 
-                    st.subheader(get_localized_text("📊 特徴的なパターン", "📊 Characteristic Patterns"))
+                    st.subheader(get_localized_text("📊 特徴的なパターン"))
 
                     if not pivot_table.empty:
                         max_val_series = pivot_table.max()
@@ -854,45 +848,43 @@ def show_main_app():
                         if not np.isnan(max_val) and not pivot_table[pivot_table == max_val].empty:
                             max_pos_df = pivot_table[pivot_table == max_val].stack().index[0]
                             st.info(get_localized_text(
-                                f"🔺 最も{heat_metric}が高い時間帯: {max_pos_df[0]}の{max_pos_df[1]}曜日 ({max_val:.2f})",
-                                f"🔺 Highest {heat_metric} time: {max_pos_df[0]} on {max_pos_df[1]} ({max_val:.2f})"
+                                f"🔺 最も{heat_metric}が高い時間帯: {max_pos_df[0]}の{max_pos_df[1]}曜日 ({max_val:.2f})"
                             ))
                         else:
-                            st.info(get_localized_text("🔺 最も高い値のパターンを特定できませんでした。", "🔺 Could not identify the highest value pattern."))
+                            st.info(get_localized_text("🔺 最も高い値のパターンを特定できませんでした。"))
 
                         if not np.isnan(min_val) and not pivot_table[pivot_table == min_val].empty:
                             min_pos_df = pivot_table[pivot_table == min_val].stack().index[0]
                             st.info(get_localized_text(
-                                f"🔻 最も{heat_metric}が低い時間帯: {min_pos_df[0]}の{min_pos_df[1]}曜日 ({min_val:.2f})",
-                                f"🔻 Lowest {heat_metric} time: {min_pos_df[0]} on {min_pos_df[1]} ({min_val:.2f})"
+                                f"🔻 最も{heat_metric}が低い時間帯: {min_pos_df[0]}の{min_pos_df[1]}曜日 ({min_val:.2f})"
                             ))
                         else:
-                            st.info(get_localized_text("🔻 最も低い値のパターンを特定できませんでした。", "🔻 Could not identify the lowest value pattern."))
+                            st.info(get_localized_text("🔻 最も低い値のパターンを特定できませんでした。"))
                     else:
-                        st.info(get_localized_text("ヒートマップデータが空のため、特徴的なパターンを特定できません。", "Heatmap data is empty, cannot identify characteristic patterns."))
+                        st.info(get_localized_text("ヒートマップデータが空のため、特徴的なパターンを特定できません。"))
 
 
                 except Exception as e:
-                    st.error(get_localized_text(f"ヒートマップ生成中にエラーが発生: {e}", f"An error occurred during heatmap generation: {e}"))
+                    st.error(get_localized_text(f"ヒートマップ生成中にエラーが発生: {e}"))
         else:
-            st.warning(get_localized_text("データがアップロードされていないか、フィルターによってデータがありません。データ管理タブでファイルをアップロードしてください。", "No data uploaded or no data after filtering. Please upload files in the Data Management tab."))
+            st.warning(get_localized_text("データがアップロードされていないか、フィルターによってデータがありません。データ管理タブでファイルをアップロードしてください。"))
 
 
     with tabs[4]:
-        st.header(get_localized_text("📉 時系列分析", "📉 Time Series Analysis"))
+        st.header(get_localized_text("📉 時系列分析"))
 
         if 'current_data' in st.session_state and st.session_state.current_data is not None and not st.session_state.current_data.empty:
             df = st.session_state.current_data.copy()
 
             if '実施日' not in df.columns:
-                st.warning(get_localized_text("時系列分析には「実施日」の列が必要です。", "The '実施日' (Date) column is required for time series analysis."))
+                st.warning(get_localized_text("時系列分析には「実施日」の列が必要です。"))
                 st.stop()
             
             # 実施日がPythonのdateオブジェクトになっているため、そのままdropna
             df = df.dropna(subset=['実施日'])
 
             if df.empty:
-                st.warning(get_localized_text("有効な日付データがありません。", "No valid date data available."))
+                st.warning(get_localized_text("有効な日付データがありません。"))
                 st.stop()
 
             # DatetimeIndexの作成用に、dateオブジェクトをTimestampに変換
@@ -903,30 +895,30 @@ def show_main_app():
             numeric_cols = df.select_dtypes(include='number').columns.tolist()
 
             if not numeric_cols:
-                st.warning(get_localized_text("数値列がありません。時系列分析は数値データに基づいています。", "No numeric columns found. Time series analysis is based on numeric data."))
+                st.warning(get_localized_text("数値列がありません。時系列分析は数値データに基づいています。"))
                 st.stop()
 
             col1, col2 = st.columns(2)
             with col1:
                 trend_metric = st.selectbox(
-                    get_localized_text("分析する指標", "Metric to Analyze"),
+                    get_localized_text("分析する指標"),
                     numeric_cols,
                     key="trend_metric"
                 )
                 trend_group = st.selectbox(
-                    get_localized_text("グループ化（オプション）", "Group By (Optional)"),
+                    get_localized_text("グループ化（オプション）"),
                     ['なし'] + cat_cols,
                     key="trend_group"
                 )
 
             with col2:
                 agg_period_display = st.selectbox(
-                    get_localized_text("集計期間", "Aggregation Period"),
-                    [get_localized_text('日次', 'Daily'), get_localized_text('週次', 'Weekly'), get_localized_text('月次', 'Monthly')],
+                    get_localized_text("集計期間"),
+                    [get_localized_text('日次'), get_localized_text('週次'), get_localized_text('月次')],
                     key="trend_period"
                 )
                 moving_avg = st.number_input(
-                    get_localized_text("移動平均期間", "Moving Average Period"), 
+                    get_localized_text("移動平均期間"), 
                     min_value=1,
                     max_value=30,
                     value=7,
@@ -937,9 +929,9 @@ def show_main_app():
                 trend_df = df.copy()
                 
                 period_map_internal = {
-                    get_localized_text('日次', 'Daily'): 'D',
-                    get_localized_text('週次', 'Weekly'): 'W',
-                    get_localized_text('月次', 'Monthly'): 'M'
+                    get_localized_text('日次'): 'D',
+                    get_localized_text('週次'): 'W',
+                    get_localized_text('月次'): 'M'
                 }
 
                 fig, ax = plt.subplots(figsize=(12, 6))
@@ -949,34 +941,34 @@ def show_main_app():
                     resampled = trend_df.set_index('実施日_timestamp')[trend_metric].resample(period_map_internal[agg_period_display]).mean()
                     
                     if not resampled.empty:
-                        resampled.plot(ax=ax, label=get_graph_text(f'{agg_period_display}平均', f'{agg_period_display} Average'), fontproperties=font_prop)
+                        resampled.plot(ax=ax, label=get_graph_text(f'{agg_period_display}平均'), fontproperties=font_prop)
                         moving = resampled.rolling(window=moving_avg, min_periods=1).mean() 
                         if not moving.empty:
-                            moving.plot(ax=ax, label=get_graph_text(f'{moving_avg}{agg_period_display[0]}移動平均', f'{moving_avg}{agg_period_display[0]} Moving Average'), style='--', fontproperties=font_prop) 
+                            moving.plot(ax=ax, label=get_graph_text(f'{moving_avg}{agg_period_display[0]}移動平均'), style='--', fontproperties=font_prop) 
                         else:
-                            st.info(get_localized_text("移動平均を計算する十分なデータがありません。", "Insufficient data to calculate moving average."))
+                            st.info(get_localized_text("移動平均を計算する十分なデータがありません。"))
                         has_data_to_plot = True
                     else:
-                        st.warning(get_localized_text("集計データが空のため、時系列グラフを生成できませんでした。", "Time series graph could not be generated as aggregation data is empty."))
+                        st.warning(get_localized_text("集計データが空のため、時系列グラフを生成できませんでした。"))
                     
                     if not resampled.empty:
-                        st.subheader(get_localized_text("📊 時系列の特徴", "📊 Time Series Characteristics"))
+                        st.subheader(get_localized_text("📊 時系列の特徴"))
                         latest_val = resampled.iloc[-1]
                         prev_val = resampled.iloc[-2] if len(resampled) > 1 else None
 
-                        st.info(get_localized_text(f"最新の{agg_period_display}平均: {latest_val:.2f}", f"Latest {agg_period_display} average: {latest_val:.2f}"))
+                        st.info(get_localized_text(f"最新の{agg_period_display}平均: {latest_val:.2f}"))
                         if prev_val is not None and prev_val != 0:
                             change = ((latest_val - prev_val) / prev_val * 100)
-                            st.info(get_localized_text(f"直近の{agg_period_display}からの変化率: {change:.1f}%", f"Change from previous {agg_period_display}: {change:.1f}%"))
+                            st.info(get_localized_text(f"直近の{agg_period_display}からの変化率: {change:.1f}%"))
                         else:
-                            st.info(get_localized_text("直近の変化率を計算するデータがありません。", "No data to calculate recent change rate."))
+                            st.info(get_localized_text("直近の変化率を計算するデータがありません。"))
                     else:
-                        st.info(get_localized_text("集計データが空のため、特徴を抽出できません。", "Aggregation data is empty, cannot extract characteristics."))
+                        st.info(get_localized_text("集計データが空のため、特徴を抽出できません。"))
 
                     if not resampled.empty:
                         csv = resampled.to_csv(encoding='utf-8-sig').encode('utf-8-sig')
                         st.download_button(
-                            get_localized_text("📥 時系列データをCSVで保存", "📥 Save Time Series Data as CSV"),
+                            get_localized_text("📥 時系列データをCSVで保存"),
                             csv,
                             file_name="trend_data.csv",
                             mime='text/csv',
@@ -996,30 +988,29 @@ def show_main_app():
                                             resampled.plot(ax=ax, label=str(group), fontproperties=font_prop) # Group name is data, keep as is
                                             moving = resampled.rolling(window=moving_avg, min_periods=1).mean()
                                             if not moving.empty:
-                                                moving.plot(ax=ax, label=get_graph_text(f'{str(group)} ({moving_avg}{agg_period_display[0]}移動平均)', f'{str(group)} ({moving_avg}{agg_period_display[0]} Moving Average)'), style='--', fontproperties=font_prop) 
+                                                moving.plot(ax=ax, label=get_graph_text(f'{str(group)} ({moving_avg}{agg_period_display[0]}移動平均)'), style='--', fontproperties=font_prop) 
                                             else:
-                                                st.info(get_localized_text(f"グループ '{group}' の移動平均を計算する十分なデータがありません。", f"Insufficient data to calculate moving average for group '{group}'."))
+                                                st.info(get_localized_text(f"グループ '{group}' の移動平均を計算する十分なデータがありません。"))
                                             has_data_to_plot = True
                                         else:
-                                            st.warning(get_localized_text(f"グループ '{group}' のデータが不足しているため、時系列グラフを生成できませんでした。", f"Time series graph could not be generated for group '{group}' due to insufficient data."))
+                                            st.warning(get_localized_text(f"グループ '{group}' のデータが不足しているため、時系列グラフを生成できませんでした。"))
                                     else:
-                                        st.warning(get_localized_text(f"グループ '{group}' のデータがありません。", f"No data for group '{group}'."))
+                                        st.warning(get_localized_text(f"グループ '{group}' のデータがありません。"))
                             
                             if not has_data_to_plot:
-                                st.warning(get_localized_text("選択されたグループのいずれも時系列データをプロットできませんでした。", "No time series data could be plotted for any of the selected groups."))
+                                st.warning(get_localized_text("選択されたグループのいずれも時系列データをプロットできませんでした。"))
                         else:
-                            st.warning(get_localized_text(f"選択されたグループ列 '{trend_group}' に有効な値がありません。", f"No valid values in selected group column '{trend_group}'."))
+                            st.warning(get_localized_text(f"選択されたグループ列 '{trend_group}' に有効な値がありません。"))
                     else:
-                        st.error(get_localized_text(f"選択されたグループ列 '{trend_group}' がデータフレームに存在しません。", f"Selected group column '{trend_group}' does not exist in the dataframe."))
+                        st.error(get_localized_text(f"選択されたグループ列 '{trend_group}' がデータフレームに存在しません。"))
 
                 if has_data_to_plot:
                     # Apply font_prop to title, labels, and legend
                     ax.set_title(get_graph_text(
-                        f"{trend_metric}の時系列 ({'全体' if trend_group == 'なし' else trend_group}別)",
-                        f"Time Series of {trend_metric} (by {'Overall' if trend_group == 'なし' else trend_group})"
+                        f"{trend_metric}の時系列 ({'全体' if trend_group == 'なし' else trend_group}別)"
                     ), fontproperties=font_prop, fontsize=16)
-                    ax.set_xlabel(get_graph_text("実施日", "Date"), fontproperties=font_prop, fontsize=12)
-                    ax.set_ylabel(get_graph_text(f"{trend_metric} ({agg_period_display}平均)", f"{trend_metric} ({agg_period_display} Average)"), fontproperties=font_prop, fontsize=12)
+                    ax.set_xlabel(get_graph_text("実施日"), fontproperties=font_prop, fontsize=12)
+                    ax.set_ylabel(get_graph_text(f"{trend_metric} ({agg_period_display}平均)"), fontproperties=font_prop, fontsize=12)
                     ax.legend(prop=font_prop) # Use font_prop directly for legend
                     ax.set_xticklabels(ax.get_xticklabels(), fontproperties=font_prop)
                     ax.set_yticklabels(ax.get_yticklabels(), fontproperties=font_prop)
@@ -1034,13 +1025,13 @@ def show_main_app():
 
 
             except Exception as e:
-                st.error(get_localized_text(f"時系列分析中にエラーが発生: {e}", f"An error occurred during time series analysis: {e}"))
+                st.error(get_localized_text(f"時系列分析中にエラーが発生: {e}"))
         else:
-            st.warning(get_localized_text("データがアップロードされていないか、フィルターによってデータがありません。データ管理タブでファイルをアップロードしてください。", "No data uploaded or no data after filtering. Please upload files in the Data Management tab."))
+            st.warning(get_localized_text("データがアップロードされていないか、フィルターによってデータがありません。データ管理タブでファイルをアップロードしてください。"))
 
 
     with tabs[5]:
-        st.header(get_localized_text("🏆 ランキング分析", "🏆 Ranking Analysis"))
+        st.header(get_localized_text("🏆 ランキング分析"))
 
         if 'current_data' in st.session_state and st.session_state.current_data is not None and not st.session_state.current_data.empty:
             df = st.session_state.current_data.copy()
@@ -1049,64 +1040,64 @@ def show_main_app():
             cat_cols = df.select_dtypes(include='object').columns.tolist()
 
             if not numeric_cols:
-                st.warning(get_localized_text("数値列がありません。", "No numeric columns found."))
+                st.warning(get_localized_text("数値列がありません。"))
                 st.stop()
             if not cat_cols:
-                st.warning(get_localized_text("カテゴリ列がありません。", "No categorical columns found."))
+                st.warning(get_localized_text("カテゴリ列がありません。"))
                 st.stop()
 
             col1, col2 = st.columns(2)
             with col1:
                 rank_metric = st.selectbox(
-                    get_localized_text("ランキング対象の指標", "Metric for Ranking"), 
+                    get_localized_text("ランキング対象の指標"), 
                     numeric_cols,
                     key="rank_metric"
                 )
                 rank_group = st.selectbox(
-                    get_localized_text("グループ化", "Group By"),
+                    get_localized_text("グループ化"),
                     cat_cols,
                     key="rank_group"
                 )
 
             with col2:
                 top_n = st.number_input(
-                    get_localized_text("表示件数", "Number of Items to Display"),
+                    get_localized_text("表示件数"),
                     min_value=1,
                     max_value=50,
                     value=10,
                     key="rank_topn"
                 )
                 ascending_option = st.radio(
-                    get_localized_text("並び順", "Sort Order"),
-                    [get_localized_text("降順（大きい順）", "Descending (Largest First)"), get_localized_text("昇順（小さい順）", "Ascending (Smallest First)")],
+                    get_localized_text("並び順"),
+                    [get_localized_text("降順（大きい順）"), get_localized_text("昇順（小さい順）")],
                     index=0,
                     key="rank_order"
                 )
 
-            if st.button(get_localized_text("ランキングを表示", "Show Ranking"), key="rank_execute"):
+            if st.button(get_localized_text("ランキングを表示"), key="rank_execute"):
                 try:
                     if rank_group not in df.columns or rank_metric not in df.columns:
-                        st.error(get_localized_text("選択された列がデータフレームに存在しません。", "Selected columns do not exist in the dataframe."))
+                        st.error(get_localized_text("選択された列がデータフレームに存在しません。"))
                         st.stop()
 
                     rank_df = df.groupby(rank_group)[rank_metric].agg(['mean', 'count']).round(2)
-                    rank_df.columns = [get_localized_text('平均値', 'Mean Value'), get_localized_text('データ数', 'Data Count')]
+                    rank_df.columns = [get_localized_text('平均値'), get_localized_text('データ数')]
                     rank_df = rank_df.sort_values(
-                        get_localized_text('平均値', 'Mean Value'),
-                        ascending=(ascending_option == get_localized_text("昇順（小さい順）", "Ascending (Smallest First)"))
+                        get_localized_text('平均値'),
+                        ascending=(ascending_option == get_localized_text("昇順（小さい順）"))
                     )
 
-                    st.subheader(get_localized_text("📊 ランキング結果", "📊 Ranking Results"))
+                    st.subheader(get_localized_text("📊 ランキング結果"))
                     rank_display = rank_df.head(top_n).copy()
                     rank_display.index.name = rank_group
                     st.dataframe(rank_display)
 
                     fig, ax = plt.subplots(figsize=(10, max(5, top_n * 0.3)))
-                    rank_display[get_localized_text('平均値', 'Mean Value')].plot(kind='barh', ax=ax)
+                    rank_display[get_localized_text('平均値')].plot(kind='barh', ax=ax)
                     # Apply font_prop to title, labels, and ticks
-                    ax.set_title(get_graph_text(f"{rank_group}別 {rank_metric}のランキング", f"Ranking of {rank_metric} by {rank_group}"), fontproperties=font_prop, fontsize=16)
-                    ax.set_xlabel(get_graph_text(f"{rank_metric} 平均値", f"{rank_metric} Mean Value"), fontproperties=font_prop, fontsize=12)
-                    ax.set_ylabel(get_graph_text(rank_group, rank_group), fontproperties=font_prop, fontsize=12) # Group name is data, keep as is
+                    ax.set_title(get_graph_text(f"{rank_group}別 {rank_metric}のランキング"), fontproperties=font_prop, fontsize=16)
+                    ax.set_xlabel(get_graph_text(f"{rank_metric} 平均値"), fontproperties=font_prop, fontsize=12)
+                    ax.set_ylabel(get_graph_text(rank_group), fontproperties=font_prop, fontsize=12) # Group name is data, keep as is
                     ax.set_xticklabels(ax.get_xticklabels(), fontproperties=font_prop)
                     ax.set_yticklabels(ax.get_yticklabels(), fontproperties=font_prop)
 
@@ -1120,50 +1111,47 @@ def show_main_app():
 
                     csv = rank_display.to_csv(encoding='utf-8-sig').encode('utf-8-sig')
                     st.download_button(
-                        get_localized_text("📥 ランキングデータをCSVで保存", "📥 Save Ranking Data as CSV"),
+                        get_localized_text("📥 ランキングデータをCSVで保存"),
                         csv,
                         file_name="ranking_data.csv",
                         mime='text/csv',
                         key="rank_download"
                     )
 
-                    st.subheader(get_localized_text("📈 特徴的なデータ", "📈 Characteristic Data"))
+                    st.subheader(get_localized_text("📈 特徴的なデータ"))
 
                     if not rank_display.empty:
                         top_item = rank_display.index[0]
-                        top_val = rank_display.loc[top_item, get_localized_text('平均値', 'Mean Value')]
+                        top_val = rank_display.loc[top_item, get_localized_text('平均値')]
                         st.info(get_localized_text(
-                            f"🏆 トップの{rank_group}: {top_item} ({top_val:.2f})",
-                            f"🏆 Top {rank_group}: {top_item} ({top_val:.2f})"
+                            f"🏆 トップの{rank_group}: {top_item} ({top_val:.2f})"
                         ))
 
                         if len(rank_display) > 1:
                             second_item = rank_display.index[1]
-                            second_val = rank_display.loc[second_item, get_localized_text('平均値', 'Mean Value')]
+                            second_val = rank_display.loc[second_item, get_localized_text('平均値')]
                             if pd.notna(top_val) and pd.notna(second_val):
                                 diff = top_val - second_val
                                 if second_val != 0:
                                     st.info(get_localized_text(
-                                        f"2位との差: {diff:.2f} ({(diff/second_val*100):.1f}%)",
-                                        f"Difference from 2nd place: {diff:.2f} ({(diff/second_val*100):.1f}%)"
+                                        f"2位との差: {diff:.2f} ({(diff/second_val*100):.1f}%)"
                                     ))
                                 else:
                                     st.info(get_localized_text(
-                                        f"2位との差: {diff:.2f} (2位の値が0のため変化率を計算できません)",
-                                        f"Difference from 2nd place: {diff:.2f} (Cannot calculate percentage change as 2nd place value is 0)"
+                                        f"2位との差: {diff:.2f} (2位の値が0のため変化率を計算できません)"
                                     ))
                             else:
-                                st.info(get_localized_text("トップまたは2位の値が欠損しているため、差を計算できません。", "Cannot calculate difference as top or second place value is missing."))
+                                st.info(get_localized_text("トップまたは2位の値が欠損しているため、差を計算できません。"))
                     else:
-                        st.info(get_localized_text("ランキングデータが空のため、特徴的なデータを特定できません。", "Ranking data is empty, cannot identify characteristic data."))
+                        st.info(get_localized_text("ランキングデータが空のため、特徴的なデータを特定できません。"))
 
                 except Exception as e:
-                    st.error(get_localized_text(f"ランキング分析中にエラーが発生: {e}", f"An error occurred during ranking analysis: {e}"))
+                    st.error(get_localized_text(f"ランキング分析中にエラーが発生: {e}"))
         else:
-            st.warning(get_localized_text("データがアップロードされていないか、フィルターによってデータがありません。データ管理タブでファイルをアップロードしてください。", "No data uploaded or no data after filtering. Please upload files in the Data Management tab."))
+            st.warning(get_localized_text("データがアップロードされていないか、フィルターによってデータがありません。データ管理タブでファイルをアップロードしてください。"))
 
     with tabs[6]:
-        st.header(get_localized_text("📋 自動レポート", "📋 Automatic Report"))
+        st.header(get_localized_text("📋 自動レポート"))
 
         if 'current_data' in st.session_state and st.session_state.current_data is not None and not st.session_state.current_data.empty:
             df = st.session_state.current_data.copy()
@@ -1178,45 +1166,31 @@ def show_main_app():
 
             df = DataProcessor.expand_time_slots(df)
 
-            st.subheader(get_localized_text("📣 参加者数を増やすためのデータ分析", "📣 Data Analysis for Increasing Participants"))
+            st.subheader(get_localized_text("📣 参加者数を増やすためのデータ分析"))
 
             def append_section_to_report(title_jp, df_to_use):
-                title_en = ""
-                if title_jp == "参加者数が多いチーム":
-                    title_en = "Teams with High Participants"
-                elif title_jp == "曜日別の参加者数":
-                    title_en = "Participants by Day of Week"
-                elif title_jp == "時間帯別の参加者数":
-                    title_en = "Participants by Time Slot"
-                elif title_jp == "参加率が高いイベント":
-                    title_en = "Events with High Participation Rate"
-                elif title_jp == "満足度が高いイベント":
-                    title_en = "Events with High Satisfaction Rate"
-                elif title_jp == "参加者数が少ない曜日":
-                    title_en = "Weekdays with Low Participants"
-                
-                st.markdown(get_localized_text(f"#### {title_jp}", f"#### {title_en}"))
+                st.markdown(get_localized_text(f"#### {title_jp}"))
                 st.dataframe(df_to_use, use_container_width=True) # use_container_width=True を追加
 
 
-            st.markdown(get_localized_text("### 🏆 ランキングまとめ", "### 🏆 Ranking Summary"))
+            st.markdown(get_localized_text("### 🏆 ランキングまとめ"))
             if '担当チーム' in df.columns and '参加者数' in df.columns:
                 team_avg = df.groupby("担当チーム")["参加者数"].mean().sort_values(ascending=False).reset_index()
                 append_section_to_report("参加者数が多いチーム", team_avg)
             else:
-                st.info(get_localized_text("「担当チーム」または「参加者数」の列がありません。", "The '担当チーム' (Responsible Team) or '参加者数' (Participants) column is missing."))
+                st.info(get_localized_text("「担当チーム」または「参加者数」の列がありません。"))
 
             if '曜日' in df.columns and '参加者数' in df.columns:
                 weekday_avg = df.groupby("曜日")["参加者数"].mean().sort_values(ascending=False).reindex(index=['月', '火', '水', '木', '金', '土', '日']).dropna().reset_index()
                 append_section_to_report("曜日別の参加者数", weekday_avg)
             else:
-                st.info(get_localized_text("「曜日」または「参加者数」の列がありません。", "The '曜日' (Weekday) or '参加者数' (Participants) column is missing."))
+                st.info(get_localized_text("「曜日」または「参加者数」の列がありません。"))
 
             if '時間帯スロット' in df.columns and '参加者数' in df.columns:
                 time_avg = df.groupby("時間帯スロット")["参加者数"].mean().sort_values(ascending=False).reset_index()
                 append_section_to_report("時間帯別の参加者数", time_avg)
             else:
-                st.info(get_localized_text("「時間帯スロット」または「参加者数」の列がありません。", "The '時間帯スロット' (Time Slot) or '参加者数' (Participants) column is missing."))
+                st.info(get_localized_text("「時間帯スロット」または「参加者数」の列がありません。"))
 
 
             if '参加率(%)' in df.columns:
@@ -1225,7 +1199,7 @@ def show_main_app():
                 top_rate.index += 1
                 append_section_to_report("参加率が高いイベント", top_rate)
             else:
-                st.info(get_localized_text("「参加率(%)」の列がありません。", "The '参加率(%)' (Participation Rate (%)) column is missing."))
+                st.info(get_localized_text("「参加率(%)」の列がありません。"))
 
             if '満足率(%)' in df.columns:
                 cols_for_top_satisfaction = [col for col in ["イベント名", "曜日", "時間帯スロット", "満足率(%)"] if col in df.columns]
@@ -1233,7 +1207,7 @@ def show_main_app():
                 top_satisfaction.index += 1
                 append_section_to_report("満足度が高いイベント", top_satisfaction)
             else:
-                st.info(get_localized_text("「満足率(%)」の列がありません。", "The '満足率(%)' (Satisfaction Rate (%)) column is missing."))
+                st.info(get_localized_text("「満足率(%)」の列がありません。"))
 
             if '曜日' in df.columns and '参加者数' in df.columns:
                 low_participation_raw = df.groupby("曜日")["参加者数"].mean().sort_values().reset_index()
@@ -1241,41 +1215,41 @@ def show_main_app():
                 low_participation.index += 1
                 append_section_to_report("参加者数が少ない曜日", low_participation)
             else:
-                st.info(get_localized_text("「曜日」または「参加者数」の列がありません。", "The '曜日' (Weekday) or '参加者数' (Participants) column is missing."))
+                st.info(get_localized_text("「曜日」または「参加者数」の列がありません。"))
 
-            st.markdown(get_localized_text("### 💡 宣伝・リアクションと参加者数の関係", "### 💡 Relationship between Promotion/Reactions and Participants"))
+            st.markdown(get_localized_text("### 💡 宣伝・リアクションと参加者数の関係"))
             
             corr_summary_text = []
             if '宣伝回数' in df.columns and '参加者数' in df.columns:
                 corr1 = df['参加者数'].corr(df['宣伝回数'])
                 if pd.notna(corr1):
-                    corr_summary_text.append(get_localized_text(f"「宣伝回数」と「参加者数」の相関: {corr1:.2f}", f"Correlation between '宣伝回数' (Promotion Count) and '参加者数' (Participants): {corr1:.2f}"))
+                    corr_summary_text.append(get_localized_text(f"「宣伝回数」と「参加者数」の相関: {corr1:.2f}"))
                 else:
-                    corr_summary_text.append(get_localized_text("「宣伝回数」と「参加者数」の相関は計算できませんでした（データ不足または定数）。", "Correlation between '宣伝回数' (Promotion Count) and '参加者数' (Participants) could not be calculated (insufficient data or constant)."))
+                    corr_summary_text.append(get_localized_text("「宣伝回数」と「参加者数」の相関は計算できませんでした（データ不足または定数）。"))
             else:
-                corr_summary_text.append(get_localized_text("「宣伝回数」の列が見つかりませんでした。", "The '宣伝回数' (Promotion Count) column was not found."))
+                corr_summary_text.append(get_localized_text("「宣伝回数」の列が見つかりませんでした。"))
 
             if 'リアクション率' in df.columns and '参加者数' in df.columns:
                 corr2 = df['参加者数'].corr(df['リアクション率'])
                 if pd.notna(corr2):
-                    corr_summary_text.append(get_localized_text(f"「リアクション率」と「参加者数」の相関: {corr2:.2f}", f"Correlation between 'リアクション率' (Reaction Rate) and '参加者数' (Participants): {corr2:.2f}"))
+                    corr_summary_text.append(get_localized_text(f"「リアクション率」と「参加者数」の相関: {corr2:.2f}"))
                 else:
-                    corr_summary_text.append(get_localized_text("「リアクション率」と「参加者数」の相関は計算できませんでした（データ不足または定数）。", "Correlation between 'リアクション率' (Reaction Rate) and '参加者数' (Participants) could not be calculated (insufficient data or constant)."))
+                    corr_summary_text.append(get_localized_text("「リアクション率」と「参加者数」の相関は計算できませんでした（データ不足または定数）。"))
             else:
-                st.info(get_localized_text("「リアクション率」の列が見つかりませんでした。", "The 'リアクション率' (Reaction Rate) column was not found."))
+                st.info(get_localized_text("「リアクション率」の列が見つかりませんでした。"))
             
             for line in corr_summary_text:
                 st.info(line)
 
 
         else:
-            st.warning(get_localized_text("データがアップロードされていないか、フィルターによってデータがありません。データ管理タブでファイルをアップロードしてください。", "No data uploaded or no data after filtering. Please upload files in the Data Management tab."))
+            st.warning(get_localized_text("データがアップロードされていないか、フィルターによってデータがありません。データ管理タブでファイルをアップロードしてください。"))
 
 
 # --- アプリケーションのエントリポイント ---
 def main():
     # Streamlitのページ設定は一度だけ行う
-    st.set_page_config(page_title=get_localized_text("VRイベント分析ツール", "VR Event Analysis Tool"), layout="wide")
+    st.set_page_config(page_title=get_localized_text("VRイベント分析ツール"), layout="wide")
 
     # セッションステートにlogged_inがなければ初期化（アプリケーション起動時にのみFalseに設定）
     if "logged_in" not in st.session_state:
@@ -1283,8 +1257,8 @@ def main():
 
     if st.session_state.get("logged_in"):
         # ログイン済みの場合、ユーザー名を表示し、ログアウトボタンとメインアプリを表示
-        st.sidebar.markdown(get_localized_text(f"**ようこそ、{st.session_state.get('username')} さん！**", f"**Welcome, {st.session_state.get('username')}!**"))
-        if st.sidebar.button(get_localized_text("ログアウト", "Logout")):
+        st.sidebar.markdown(get_localized_text(f"**ようこそ、{st.session_state.get('username')} さん！**"))
+        if st.sidebar.button(get_localized_text("ログアウト")):
             # ログアウト処理
             for key in ["logged_in", "username", "num_uploaders"]: # num_uploadersもクリア
                 st.session_state.pop(key, None)
