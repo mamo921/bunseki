@@ -463,7 +463,7 @@ def show_main_app():
                 value_counts.plot(kind='bar', ax=ax)
                 
                 title_font = {'fontfamily': plt.rcParams['font.family'], 'fontsize': 12}
-                ax.set_title(get_graph_text(f"{selected_col}の値カウント", f"Value Counts of {selected_col}", fontproperties=font_prop), **title_font)
+                ax.set_title(get_graph_text(f"{selected_col}の値カウント", f"Value Counts of {selected_col}"), fontproperties=font_prop, **title_font)
                 ax.set_xlabel(get_graph_text(selected_col, selected_col, fontproperties=font_prop), fontfamily=plt.rcParams['font.family'])
                 ax.set_ylabel(get_graph_text("カウント", "Count", fontproperties=font_prop), fontfamily=plt.rcParams['font.family'])
                 
