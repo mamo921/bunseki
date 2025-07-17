@@ -107,6 +107,8 @@ class DataProcessor:
 def load_users_from_secrets():
     users_data = []
     if 'users' in st.secrets:
+        st.write("デバッグ: st.secrets.users の型:", type(st.secrets.users))
+        st.write("デバッグ: st.secrets.users の内容:", st.secrets.users)
         for username_key in st.secrets.users.keys():
             if username_key.startswith("user_"):
                 user_info = st.secrets.users[username_key]
