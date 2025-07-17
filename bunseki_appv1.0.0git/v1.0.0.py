@@ -1265,9 +1265,9 @@ def show_main_app():
 def main():
     # Streamlitのページ設定は一度だけ行う
     st.set_page_config(page_title=get_localized_text("VRイベント分析ツール", "VR Event Analysis Tool"), layout="wide")
-    st.set_page_config(page_title=get_localized_text("font_name:", font_name), layout="wide")
-    st.set_page_config(page_title=get_localized_text("font_prop:", font_prop), layout="wide")
-    st.set_page_config(page_title=get_localized_text("available fonts:", fm.findSystemFonts(fontpaths=None, fontext='ttf')), layout="wide")
+    st.info(get_localized_text("font_name:", font_name), layout="wide")
+    st.info(get_localized_text("font_prop:", font_prop), layout="wide")
+    st.info(get_localized_text("available fonts:", fm.findSystemFonts(fontpaths=None, fontext='ttf')), layout="wide")
 
     # セッションステートにlogged_inがなければ初期化（アプリケーション起動時にのみFalseに設定）
     if "logged_in" not in st.session_state:
