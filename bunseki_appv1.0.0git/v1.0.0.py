@@ -115,15 +115,26 @@ def load_users_from_secrets():
         # AttrDictはkeys()メソッドを持つため、直接ループしてアクセスします
         # isinstance(st.secrets.users, dict) のチェックは不要です
         for username_key in st.secrets.users.keys():
-            if username_key.startswith("user_"): # ユーザー名であることを示すプレフィックス
-                user_info = st.secrets.users[username_key] # AttrDictから直接アクセス可能
-                if isinstance(user_info, dict) and 'username' in user_info and 'password_hash' in user_info:
+            if username_key.startswith("user_"):
+                raw_value = st.secrets.users[username_key]
+
+                # secrets.toml内で文字列（JSON）として登録されている場合はデコードする
+                if isinstance(raw_value, str):
+                    try:
+                        user_info = json.loads(raw_value)
+                    except json.JSONDecodeError:
+                        st.error(f"{username_key} のJSONデコードに失敗しました")
+                        continue
+                else:
+                    user_info = raw_value  # すでに辞書形式の場合はそのまま使う
+
+                if 'username' in user_info and 'password_hash' in user_info:
                     users_data.append(user_info)
-                elif isinstance(user_info, str): # 旧形式のパスワードハッシュを直接格納している場合
-                    st.warning(f"secrets.tomlの'users.{username_key}'の形式が古い可能性があります。辞書形式を推奨します。")
-                    users_data.append({"username": username_key.replace("user_", ""), "password_hash": user_info})
+                else:
+                    st.warning(f"{username_key} のデータ形式が不正です")
             else:
-                st.warning(f"secrets.tomlの'users'セクションに予期しないキー '{username_key}' が見つかりました。'user_'で始まるキーのみが処理されます。")
+                st.warning(f"予期しないキー '{username_key}' が users にあります")
+
     
     # ユーザーが一人もロードされなかった場合の最終エラーチェック
     if not users_data:
