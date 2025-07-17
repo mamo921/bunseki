@@ -36,7 +36,11 @@ def login_form():
                     st.session_state["logged_in"] = True
                     st.session_state["username"] = user["username"]
                     st.success("ログイン成功！")
-                    st.experimental_rerun()
+                    if verify_password(password_input, user["password_hash"]):
+                        st.session_state["logged_in"] = True
+                        st.session_state["username"] = user["username"]
+                        st.experimental_rerun()  # ← rerun は何も表示せず即実行！
+
                     return
                 else:
                     st.warning("パスワードが違います")
