@@ -16,7 +16,7 @@ plt.rcParams['axes.unicode_minus'] = False
 plt.rcParams['font.size'] = 10
 
 # フォントファイルのパス
-font_path = "bunseki_appv1.0.0git/static/NotoSansJP-VariableFont_wght.otf"
+font_path = "bunseki_appv1.0.0git/static/NotoSansJP-VariableFont_wght.ttf"
 
 # フォント読み込みチェック
 if os.path.exists(font_path):
@@ -483,7 +483,7 @@ def show_main_app():
 
                 # タイトル・軸ラベル
                 ax.set_title(get_graph_text(f"{selected_col}の値カウント", f"Value Counts of {selected_col}"), fontproperties=font_prop, **title_font)
-                ax.set_xlabel("テストラベル", fontproperties=font_prop)
+                ax.set_xlabel(get_graph_text(selected_col, selected_col), fontproperties=font_prop)
                 ax.set_ylabel(get_graph_text("カウント", "Count"), fontproperties=font_prop)
 
                 # ✅ x軸のTickラベルを完全に再描画する
