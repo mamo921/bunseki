@@ -7,6 +7,7 @@ import io
 from datetime import datetime
 import json
 import re
+import bcrypt
 
 plt.rcParams['font.family'] = 'sans-serif'
 plt.rcParams['font.sans-serif'] = ['IPAexGothic', 'Noto Sans CJK JP', 'MS Gothic', 'Yu Gothic', 'Meiryo']
@@ -22,7 +23,7 @@ class SessionManager:
             'analysis_log': [],
             'comparison_template': {},
             'current_data': None,
-            'selected_teams': None, # フィルターの状態を保持するためにNoneを許容
+            'selected_teams': None,
             'date_range': [None, None],
             'analysis_count': 0,
             'heatmap_count': 0,
@@ -31,7 +32,9 @@ class SessionManager:
             'dfmain': None,
             'uploaded_file_processed': False,
             'num_uploaders': 1,
-            'previous_files_hash': None
+            'previous_files_hash': None,
+            'logged_in': False,
+            'username': None
         }
         
         for var, default in session_vars.items():
@@ -67,17 +70,15 @@ class DataProcessor:
             return None
             
         if '実施日' in df.columns:
-            # 実施日列の変換とNaNチェックを追加
             initial_nan_count = df['実施日'].isnull().sum()
             df['実施日'] = pd.to_datetime(df['実施日'], errors='coerce')
-            # 時間部分を削除し、日付のみにする（.dt.normalize()を追加）
             df['実施日'] = df['実施日'].dt.normalize().dt.date 
 
             nan_after_coerce = df['実施日'].isnull().sum()
             
             if nan_after_coerce > initial_nan_count:
                 newly_coerced_nan_percentage = (nan_after_coerce - initial_nan_count) / len(df) * 100
-                if newly_coerced_nan_percentage > 10: # 例えば10%以上の値が無効になった場合に警告
+                if newly_coerced_nan_percentage > 10:
                     st.warning(f"「実施日」列の{newly_coerced_nan_percentage:.1f}%が日付として認識できませんでした。元のデータ形式を確認してください。")
 
         numeric_cols = ['申込数', '参加者数', 'リアクション数', '宣伝回数', '満足回答']
@@ -99,15 +100,79 @@ class DataProcessor:
         if '時間帯' in df.columns:
             df['時間帯'] = df['時間帯'].astype(str)
             df['時間帯スロット'] = df['時間帯'].str.split('・')
-            df = df.explode('時間帯スロット').reset_index(drop=True) # インデックスのリセットを追加
+            df = df.explode('時間帯スロット').reset_index(drop=True)
             df['時間帯スロット'] = df['時間帯スロット'].str.strip()
         return df
 
+# ユーザー情報をStreamlit secretsからロードする関数
+def load_users_from_secrets():
+    users_data = []
+    if 'users' in st.secrets:
+        for username_key in st.secrets.users.keys():
+            if username_key.startswith("user_"): # ユーザー名であることを示すプレフィックス
+                user_info = st.secrets.users[username_key]
+                if isinstance(user_info, dict) and 'username' in user_info and 'password_hash' in user_info:
+                    users_data.append(user_info)
+                elif isinstance(user_info, str): # 旧形式のパスワードハッシュを直接格納している場合
+                    # このケースは推奨されないが、互換性のために考慮
+                    st.warning(f"secrets.tomlの'users.{username_key}'の形式が古い可能性があります。辞書形式を推奨します。")
+                    users_data.append({"username": username_key.replace("user_", ""), "password_hash": user_info})
+    if not users_data:
+        st.error("Streamlit secretsにユーザー情報が設定されていないか、形式が不正です。")
+    return users_data
+
+# パスワードをハッシュ化する関数
+def hash_password(password):
+    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+# パスワードを検証する関数
+def verify_password(plain_password, hashed_password):
+    return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
 
 def main():
     st.title("VRイベント分析アプリ")
 
     SessionManager.initialize()
+
+    if not st.session_state.logged_in:
+        st.sidebar.header("ログイン")
+        username_input = st.sidebar.text_input("ユーザー名")
+        password_input = st.sidebar.text_input("パスワード", type="password")
+
+        if st.sidebar.button("ログイン"):
+            users = load_users_from_secrets() # secretsからユーザー情報をロード
+            user_found = False
+            for user in users:
+                if user['username'] == username_input:
+                    user_found = True
+                    if verify_password(password_input, user['password_hash']):
+                        st.session_state.logged_in = True
+                        st.session_state.username = username_input
+                        st.sidebar.success(f"ようこそ、{username_input}さん！")
+                        st.experimental_rerun()
+                    else:
+                        st.sidebar.error("パスワードが間違っています。")
+                    break
+            if not user_found:
+                st.sidebar.error("ユーザー名が見つかりません。")
+        
+        st.info("ログインするとアプリケーションの機能が利用できます。")
+        return
+
+    with st.sidebar:
+        st.markdown(f"**ログイン中:** {st.session_state.username}")
+        if st.button("ログアウト"):
+            st.session_state.logged_in = False
+            st.session_state.username = None
+            st.session_state.selected_teams = None
+            st.session_state.dfmain = None
+            st.session_state.current_data = None
+            st.session_state.upload_files = []
+            st.session_state.uploaded_file_processed = False
+            st.session_state.num_uploaders = 1
+            st.session_state.previous_files_hash = None
+            st.experimental_rerun()
+
 
     with st.sidebar:
         st.markdown("## 🔍 フィルター設定")
@@ -121,31 +186,25 @@ def main():
             if '担当チーム' in df_filtered.columns:
                 teams = sorted(df_filtered['担当チーム'].dropna().unique())
                 
-                # selected_teams の初期値をセッションステートから取得、なければ全選択
                 initial_selected_teams = st.session_state.get('selected_teams')
-                # selected_teams がNoneの場合、全チームを選択状態にする
                 if initial_selected_teams is None:
                     initial_selected_teams = teams
                 
                 selected_teams = st.multiselect(
                     "👥 担当チーム", 
                     teams, 
-                    default=[t for t in initial_selected_teams if t in teams] # 存在しないチームがdefaultに含まれないようにフィルタ
+                    default=[t for t in initial_selected_teams if t in teams]
                 )
-                st.session_state.selected_teams = selected_teams # セッションステートに選択を保存
+                st.session_state.selected_teams = selected_teams
 
-                # 担当チームが何も選択されていない場合の動作変更
                 if len(selected_teams) == 0:
                     st.warning("担当チームが選択されていません。全ての担当チームのデータが表示されます。")
-                    # df_filtered はこのブロックに入る前の状態（dfmain_for_sidebar）のまま使用
                 else:
                     df_filtered = df_filtered[df_filtered['担当チーム'].isin(selected_teams)]
 
             if '実施日' in df_filtered.columns:
-                # dt.dateに変換されているため、そのまま使用
                 valid_dates = df_filtered['実施日'].dropna()
                 if not valid_dates.empty:
-                    # Pythonのdateオブジェクトはmin()/max()で直接比較可能
                     min_date = min(valid_dates)
                     max_date = max(valid_dates)
                     
@@ -389,7 +448,7 @@ def main():
                     z_scores = np.abs((analysis_df[target_num] - analysis_df[target_num].mean()) / 
                                     analysis_df[target_num].std())
                     analysis_df = analysis_df[z_scores < 3]
-                elif exclude_outliers: # std=0の場合
+                elif exclude_outliers:
                     st.info(f"'{target_num}'のデータにばらつきがないため、外れ値除外は適用されませんでした。")
 
 
@@ -406,9 +465,7 @@ def main():
                 if group_col in analysis_df.columns and target_num in analysis_df.columns:
                     grouped_df = analysis_df.groupby(group_col)[target_num].agg(agg_funcs_list)
                     
-                    # 存在するカラムのみリネーム
                     rename_dict = {agg_map[a]: f"{target_num}_{a}" for a in selected_aggs if a in agg_map}
-                    # 実際のgrouped_dfのcolumnsに存在するキーのみでrename_dictをフィルタリング
                     filtered_rename_dict = {k: v for k, v in rename_dict.items() if k in grouped_df.columns}
                     grouped_df.rename(columns=filtered_rename_dict, inplace=True)
 
@@ -593,7 +650,7 @@ def main():
 
                     if normalize and not pivot_table.empty and pivot_table.std().std() > 0:
                         pivot_table = (pivot_table - pivot_table.mean().mean()) / pivot_table.std().std()
-                    elif normalize and not pivot_table.empty: # 標準偏差が0の場合
+                    elif normalize and not pivot_table.empty:
                         st.info("データにばらつきがないため、ヒートマップの正規化はスキップされました。")
 
 
@@ -680,14 +737,12 @@ def main():
                 st.warning("時系列分析には「実施日」の列が必要です。")
                 st.stop()
             
-            # 実施日がPythonのdateオブジェクトになっているため、そのままdropna
             df = df.dropna(subset=['実施日'])
 
             if df.empty:
                 st.warning("有効な日付データがありません。")
                 st.stop()
 
-            # DatetimeIndexの作成用に、dateオブジェクトをTimestampに変換
             df['実施日_timestamp'] = pd.to_datetime(df['実施日'])
 
 
@@ -947,7 +1002,7 @@ def main():
 
             def append_section_to_report(title, df_to_use):
                 st.markdown(f"#### {title}")
-                st.dataframe(df_to_use, use_container_width=True) # use_container_width=True を追加
+                st.dataframe(df_to_use, use_container_width=True)
 
 
             st.markdown("### 🏆 ランキングまとめ")
