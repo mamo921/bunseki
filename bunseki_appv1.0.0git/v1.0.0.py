@@ -31,22 +31,20 @@ except Exception:
         plt.rcParams['font.sans-serif'] = ['IPAexGothic']
         japanese_font_available = True
     except Exception:
-        # 日本語フォントが見つからない場合の警告とフォールバック
-        st.warning("Japanese fonts were not found. Graph labels and some text may not display correctly and will be shown in English.")
+        # 日本語フォントが見つからない場合の警告
+        st.warning("日本語フォントが見つかりませんでした。グラフのラベルは英語で表示されます。")
         plt.rcParams['font.family'] = 'sans-serif'
         plt.rcParams['font.sans-serif'] = ['DejaVu Sans', 'Arial', 'Liberation Sans'] # 一般的なフォールバック
 
 # 全体的なフォントサイズを設定（必要に応じて調整）
 plt.rcParams['font.size'] = 10
 
-# Helper function for localization
+# Helper function for localization (UI elements always in Japanese)
 def get_localized_text(jp_text, en_text):
-    # UI要素は常に日本語を優先し、フォントがなければ英語にフォールバック
-    return jp_text if japanese_font_available else en_text
+    return jp_text
 
-# Helper function for graph localization
+# Helper function for graph localization (graphs switch to English if Japanese font not available)
 def get_graph_text(jp_text, en_text):
-    # グラフ要素は、日本語フォントがなければ強制的に英語
     return jp_text if japanese_font_available else en_text
 
 # ページ設定
@@ -1093,7 +1091,8 @@ def show_main_app():
                 df['参加率(%)'] = (df['参加者数'] / df['申込数']) * 100
             if '満足率(%)' not in df.columns and '満足回答' in df.columns and '参加者数' in df.columns:
                 df['満足率(%)'] = (df['満足回答'] / df['参加者数']) * 100
-            if 'リアクション率' not in in df.columns and '参加者数' in df.columns:
+            # 修正: 'not in in' を 'not in' に変更
+            if 'リアクション率' not in df.columns and '参加者数' in df.columns:
                 df['リアクション率'] = df['リアクション数'] / df['参加者数']
 
             df = DataProcessor.expand_time_slots(df)
