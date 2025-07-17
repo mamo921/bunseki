@@ -11,28 +11,29 @@ import bcrypt
 import matplotlib.font_manager as fm # フォントマネージャーをインポート
 
 # matplotlibのフォント設定
-# 日本語フォントのリストを定義
-japanese_fonts = ['IPAexGothic', 'Noto Sans CJK JP', 'Yu Gothic', 'Meiryo', 'MS Gothic']
-found_japanese_font = False
-
-# 利用可能な日本語フォントを検索し、設定
-for font in japanese_fonts:
-    # fonthandler引数を削除
-    if fm.findfont(font, rebuild_if_missing=False):
-        plt.rcParams['font.family'] = font
-        plt.rcParams['font.sans-serif'] = [font] # sans-serifにも設定
-        found_japanese_font = True
-        break
-
-if not found_japanese_font:
-    st.warning("日本語フォントが見つかりませんでした。グラフの日本語が正しく表示されない可能性があります。")
-    # フォントが見つからない場合のフォールバック（既存のsans-serif設定を維持）
-    plt.rcParams['font.family'] = 'sans-serif'
-    plt.rcParams['font.sans-serif'] = ['IPAexGothic', 'Noto Sans CJK JP', 'MS Gothic', 'Yu Gothic', 'Meiryo']
-
-
 # 負の記号が文字化けするのを防ぐ
 plt.rcParams['axes.unicode_minus'] = False
+
+# 日本語フォントの設定をより堅牢にする
+# 一般的にStreamlit Cloudで利用可能なフォントを優先
+try:
+    # Noto Sans CJK JP を試す
+    fm.findfont('Noto Sans CJK JP', fallback_to_default=False)
+    plt.rcParams['font.family'] = 'Noto Sans CJK JP'
+    plt.rcParams['font.sans-serif'] = ['Noto Sans CJK JP']
+except Exception:
+    try:
+        # IPAexGothic を試す
+        fm.findfont('IPAexGothic', fallback_to_default=False)
+        plt.rcParams['font.family'] = 'IPAexGothic'
+        plt.rcParams['font.sans-serif'] = ['IPAexGothic']
+    except Exception:
+        st.warning("日本語フォントが見つかりませんでした。グラフの日本語が正しく表示されない可能性があります。")
+        # フォールバックとして汎用的なsans-serifを設定
+        plt.rcParams['font.family'] = 'sans-serif'
+        plt.rcParams['font.sans-serif'] = ['DejaVu Sans', 'Arial', 'Liberation Sans'] # 一般的なフォールバック
+
+
 # 全体的なフォントサイズを設定（必要に応じて調整）
 plt.rcParams['font.size'] = 10
 
