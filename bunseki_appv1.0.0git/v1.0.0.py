@@ -46,7 +46,7 @@ def login_form():
                     st.session_state["logged_in"] = True
                     st.session_state["username"] = user["username"]
                     st.success("ログイン成功！")
-                    st.experimental_rerun()
+                    st.rerun()
                 else:
                     st.error("パスワードが違います。")
                 break
