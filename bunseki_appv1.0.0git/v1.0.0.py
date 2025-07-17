@@ -104,6 +104,26 @@ class DataProcessor:
             df['時間帯スロット'] = df['時間帯スロット'].str.strip()
         return df
 
+def load_users_from_secrets():
+    users_data = []
+    if 'users' in st.secrets:
+        for username_key in st.secrets.users.keys():
+            if username_key.startswith("user_"):
+                user_info = st.secrets.users[username_key]
+                if isinstance(user_info, dict) and 'username' in user_info and 'password_hash' in user_info:
+                    users_data.append(user_info)
+                elif isinstance(user_info, str):
+                    st.warning(f"secrets.tomlの'users.{username_key}'の形式が古い可能性があります。辞書形式を推奨します。")
+                    users_data.append({"username": username_key.replace("user_", ""), "password_hash": user_info})
+    if not users_data:
+        st.error("Streamlit secretsにユーザー情報が設定されていないか、形式が不正です。")
+
+    # --- ここから追加 ---
+    st.write("デバッグ: ロードされたユーザーデータ:", users_data) 
+    # --- ここまで追加 ---
+
+    return users_data
+
 # ユーザー情報をStreamlit secretsからロードする関数
 def load_users_from_secrets():
     users_data = []
