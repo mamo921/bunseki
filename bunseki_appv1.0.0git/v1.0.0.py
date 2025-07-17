@@ -257,7 +257,14 @@ def show_main_app():
                 # 現在のセッションの選択が存在しないチームを含んでいたらリセット
                 previous_selection = st.session_state.get("selected_teams", [])
 
-                # 有効な選択肢だけに絞る
+                # もともとセッションに保存された選択状態を取得
+                previous_selection = st.session_state.get("selected_teams", [])
+
+                # 安全なリスト型じゃなければ空リストにする
+                if not isinstance(previous_selection, list):
+                    previous_selection = []
+
+                # 有効な選択肢だけにフィルタリング
                 valid_selection = [t for t in previous_selection if t in teams]
 
                 # 選択肢が減って、全部消えた場合 → 全選択で初期化
