@@ -1,36 +1,26 @@
-import streamlit as st
-import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
-import numpy as np
-import io
-from datetime import datetime
-import json
-import re
-import bcrypt
-import matplotlib.font_manager as fm  # フォントマネージャーをインポート
 import os
+import matplotlib.font_manager as fm
+import streamlit as st
+import matplotlib.pyplot as plt
 
 # matplotlibのフォント設定
-plt.rcParams['axes.unicode_minus'] = False  # 負の記号が文字化けするのを防ぐ
+plt.rcParams['axes.unicode_minus'] = False
 plt.rcParams['font.size'] = 10
 
 # 日本語フォントの設定
+font_path = "bunseki_appv1.0.0git/static/NotoSansJP-VariableFont_wght.otf"
 font_prop = None
 japanese_font_available = False
-
-# フォントファイルのパス（Streamlit Cloud では相対パスで static/ フォルダ内にある必要あり）
-font_path = "static/NotoSansJP-Regular.otf"
 
 if os.path.exists(font_path):
     try:
         font_prop = fm.FontProperties(fname=font_path)
         japanese_font_available = True
-        st.info("日本語フォント 'NotoSansJP-Regular.otf' を使用します。")
+        st.info("日本語フォントを使用します。")
     except Exception as e:
         st.warning(f"フォント読み込みに失敗しました: {e}")
 else:
-    st.warning("日本語フォントが見つかりません。英語フォントで代用されます。")
+    st.warning("指定されたフォントファイルが見つかりません。")
 
 # UIテキストは常に日本語
 def get_localized_text(jp_text, en_text):
@@ -39,6 +29,7 @@ def get_localized_text(jp_text, en_text):
 # グラフテキストは日本語フォントがあれば日本語、なければ英語
 def get_graph_text(jp_text, en_text):
     return jp_text if japanese_font_available else en_text
+
 
 # ページ設定
 st.set_page_config(page_title=get_localized_text("VRイベント分析ツール", "VR Event Analysis Tool"), layout="wide")
