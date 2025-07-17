@@ -194,6 +194,18 @@ class DataProcessor:
 
 # メインダッシュボードの表示 (v1.0.0.py の main 関数を show_main_app にリネーム)
 def show_main_app():
+    st.markdown("""
+    <style>
+    @font-face {
+    font-family: 'Noto Sans JP';
+    src: url('/static/NotoSansJP-Thin.woff2') format('woff2');
+    }
+    body, div, p, span, input, label {
+    font-family: 'Noto Sans JP', sans-serif !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
     st.title(get_localized_text("VRイベント分析アプリ", "VR Event Analysis App"))
 
     SessionManager.initialize()
