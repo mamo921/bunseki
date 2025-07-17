@@ -236,17 +236,25 @@ def show_main_app():
 
             # 👥 担当チームフィルター
             if '担当チーム' in df_filtered.columns:
-                teams = sorted(df_filtered['担当チーム'].dropna().unique())
+                teams = sorted(df_filtered['担当チーム'].dropna().unique().tolist())  # ← 念のため .tolist() もつける
 
-                # 🔁 初期化：選択肢が変わったときだけ全選択にリセット
-                if 'selected_teams_all' not in st.session_state or st.session_state['selected_teams_all'] != teams:
+                # 初期化：選択肢が変わったときにのみリセット
+                if (
+                    'selected_teams_all' not in st.session_state
+                    or st.session_state['selected_teams_all'] != teams
+                ):
                     st.session_state['selected_teams'] = teams.copy()
                     st.session_state['selected_teams_all'] = teams.copy()
+
+                # default を厳密にフィルタしておく
+                current_default = [
+                    t for t in st.session_state.get('selected_teams', []) if t in teams
+                ]
 
                 st.multiselect(
                     get_localized_text("👥 担当チーム"),
                     teams,
-                    default=st.session_state['selected_teams'],
+                    default=current_default,  # ← 安全なリストだけを渡す
                     key="selected_teams"
                 )
 
@@ -254,6 +262,7 @@ def show_main_app():
                     df_filtered = df_filtered[df_filtered['担当チーム'].isin(st.session_state['selected_teams'])]
                 else:
                     st.warning(get_localized_text("担当チームが選択されていません。全ての担当チームのデータが表示されます。"))
+
 
             if '実施日' in df_filtered.columns:
                 # dt.dateに変換されているため、そのまま使用
