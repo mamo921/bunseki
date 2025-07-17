@@ -17,7 +17,8 @@ found_japanese_font = False
 
 # 利用可能な日本語フォントを検索し、設定
 for font in japanese_fonts:
-    if fm.findfont(font, fonthandler=fm.FontManager(), rebuild_if_missing=False):
+    # fonthandler引数を削除
+    if fm.findfont(font, rebuild_if_missing=False):
         plt.rcParams['font.family'] = font
         plt.rcParams['font.sans-serif'] = [font] # sans-serifにも設定
         found_japanese_font = True
@@ -491,7 +492,7 @@ def show_main_app():
                     grouped_df = pd.DataFrame()
 
                 if not grouped_df.empty:
-                    st.markdown("### � グループ別集計結果")
+                    st.markdown("### 📊 グループ別集計結果")
                     st.dataframe(grouped_df.round(2), use_container_width=True)
 
                     if selected_aggs:
@@ -704,7 +705,7 @@ def show_main_app():
                         key="heat_download"
                     )
 
-                    st.subheader("📊 特徴的なパターン")
+                    st.subheader("� 特徴的なパターン")
 
                     if not pivot_table.empty:
                         max_val_series = pivot_table.max()
