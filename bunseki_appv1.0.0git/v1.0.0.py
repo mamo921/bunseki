@@ -11,7 +11,16 @@ import bcrypt
 import matplotlib.font_manager as fm # フォントマネージャーをインポート
 import os
 
-st.write("dfmain 担当チーム一覧:", st.session_state.get("dfmain")["担当チーム"].unique())
+dfmain = st.session_state.get("dfmain")
+
+if isinstance(dfmain, pd.DataFrame):
+    if "担当チーム" in dfmain.columns:
+        st.write("dfmain 担当チーム一覧:", dfmain["担当チーム"].unique())
+    else:
+        st.warning("dfmain に『担当チーム』列が存在しません。")
+else:
+    st.warning("dfmain が読み込まれていません。")
+
 
 # このファイルと同じ階層に static フォルダがある場合
 font_path = os.path.join(os.path.dirname(__file__), "static", "NotoSansJP-VariableFont_wght.ttf")
