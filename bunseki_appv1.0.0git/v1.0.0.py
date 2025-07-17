@@ -225,6 +225,15 @@ def show_main_app():
 
     SessionManager.initialize()
 
+    df_current = st.session_state.get("current_data")
+    df_main = st.session_state.get("dfmain")
+
+    if "df_filtered" not in st.session_state or st.session_state["df_filtered"] is None or getattr(st.session_state["df_filtered"], "empty", True):
+        if df_current is not None and not df_current.empty:
+            st.session_state["df_filtered"] = df_current.copy()
+        elif df_main is not None and not df_main.empty:
+            st.session_state["df_filtered"] = df_main.copy()
+
     # 🔧 df_filtered を常に current_data から再生成（空だったら dfmain から）
     if "df_filtered" not in st.session_state or st.session_state["df_filtered"] is None or st.session_state["df_filtered"] is ... or getattr(st.session_state["df_filtered"], "empty", True):
         df_candidate = st.session_state.get("current_data") or st.session_state.get("dfmain")
