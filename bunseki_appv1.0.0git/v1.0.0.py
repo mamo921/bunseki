@@ -489,7 +489,7 @@ def show_main_app():
 
                 # タイトル・軸ラベル
                 ax.set_title(get_graph_text(f"{selected_col}の値カウント"), fontproperties=font_prop, **title_font)
-                ax.set_xlabel(get_graph_text("ぱも"), fontproperties=font_prop)
+                ax.set_xlabel(get_graph_text(selected_col), fontproperties=font_prop)
                 ax.set_ylabel(get_graph_text("カウント"), fontproperties=font_prop)
 
                 # ✅ x軸のTickラベルを完全に再描画する
