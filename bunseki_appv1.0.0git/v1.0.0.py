@@ -15,9 +15,6 @@ font_path = "bunseki_appv1.0.0git/static/NotoSansJP-VariableFont_wght.otf"
 font_prop = fm.FontProperties(fname=font_path)
 
 font_prop = fm.FontProperties(fname=font_path)
-plt.rcParams['font.family'] = font_prop.get_name()
-
-
 # matplotlibのフォント設定
 # 負の記号が文字化けするのを防ぐ
 plt.rcParams['axes.unicode_minus'] = False
@@ -29,20 +26,18 @@ try:
     # Noto Sans CJK JP を試す
     fm.findfont('Noto Sans CJK JP', fallback_to_default=False)
     plt.rcParams['font.family'] = 'Noto Sans CJK JP'
-    plt.rcParams['font.sans-serif'] = ['Noto Sans CJK JP']
     japanese_font_available = True
 except Exception:
     try:
         # IPAexGothic を試す
         fm.findfont('IPAexGothic', fallback_to_default=False)
         plt.rcParams['font.family'] = 'IPAexGothic'
-        plt.rcParams['font.sans-serif'] = ['IPAexGothic']
         japanese_font_available = True
     except Exception:
         # 日本語フォントが見つからない場合の警告
         st.warning("日本語フォントが見つかりませんでした。グラフのラベルは英語で表示されます。")
         plt.rcParams['font.family'] = 'sans-serif'
-        plt.rcParams['font.sans-serif'] = ['DejaVu Sans', 'Arial', 'Liberation Sans'] # 一般的なフォールバック
+        # 一般的なフォールバック
 
 # 全体的なフォントサイズを設定（必要に応じて調整）
 plt.rcParams['font.size'] = 10
