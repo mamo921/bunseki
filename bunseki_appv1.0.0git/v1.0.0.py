@@ -464,9 +464,17 @@ def show_main_app():
                 fig, ax = plt.subplots()
                 sns.countplot(x=selected_col, data=df_filtered, order=df_filtered[selected_col].value_counts().index, ax=ax)
 
-                # x軸ラベルを日本語フォントで再設定
+                # 描画（tickが作られた後）を強制実行
+                plt.draw()
+
+                # x軸ラベルにフォントを個別に適用
                 for label in ax.get_xticklabels():
                     label.set_fontproperties(font_prop)
+
+                # 念のため tight_layout
+                plt.tight_layout()
+
+                st.pyplot(fig)
 
                 # タイトル・軸ラベル
                 ax.set_title(get_graph_text(f"{selected_col}の値カウント", f"Value Counts of {selected_col}"), fontproperties=font_prop, **title_font)
