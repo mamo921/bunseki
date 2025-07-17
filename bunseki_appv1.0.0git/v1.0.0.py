@@ -9,6 +9,7 @@ import json
 import re
 import bcrypt
 import matplotlib.font_manager as fm # フォントマネージャーをインポート
+import os
 
 # matplotlibのフォント設定
 plt.rcParams['axes.unicode_minus'] = False
