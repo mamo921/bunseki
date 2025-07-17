@@ -259,29 +259,24 @@ def show_main_app():
 
             # 👥 担当チームフィルター
             if '担当チーム' in df_filtered.columns:
-                teams = sorted(df_filtered['担当チーム'].dropna().unique().tolist())  # ← list に変換しておく！
+                teams = sorted(df_filtered['担当チーム'].dropna().unique().tolist())  # 必ず list 化！
 
-                # 現在のセッションの選択が存在しないチームを含んでいたらリセット
+                # 安全に取得（list じゃなかったら初期化）
                 previous_selection = st.session_state.get("selected_teams", [])
-
-                # もともとセッションに保存された選択状態を取得
-                previous_selection = st.session_state.get("selected_teams", [])
-
-                # 安全なリスト型じゃなければ空リストにする
                 if not isinstance(previous_selection, list):
                     previous_selection = []
 
-                # 有効な選択肢だけにフィルタリング
+                # 選択肢にあるものだけ残す
                 valid_selection = [t for t in previous_selection if t in teams]
 
-                # 選択肢が減って、全部消えた場合 → 全選択で初期化
+                # 選択肢が全部消えていたら全選択で復旧
                 if not valid_selection:
                     valid_selection = teams.copy()
 
-                # セッションに保存（←ここで事前に更新）
+                # セッションに保存
                 st.session_state["selected_teams"] = valid_selection
 
-                # 表示（key指定でセッション管理）
+                # multiselect 表示
                 st.multiselect(
                     get_localized_text("👥 担当チーム"),
                     options=teams,
@@ -289,6 +284,7 @@ def show_main_app():
                     key="selected_teams"
                 )
 
+                # 実際のフィルター適用
                 if st.session_state['selected_teams']:
                     df_filtered = df_filtered[df_filtered['担当チーム'].isin(st.session_state['selected_teams'])]
                 else:
