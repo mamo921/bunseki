@@ -225,6 +225,13 @@ def show_main_app():
 
     SessionManager.initialize()
 
+    # 🔧 df_filtered を完全に同期させておく
+    df_filtered = st.session_state.get("current_data")
+
+    # fallback（まだcurrent_dataがNoneならdfmainを使う）
+    if df_filtered is None or df_filtered.empty:
+        df_filtered = st.session_state.get("dfmain")
+
     # 🔁 データが処理済みフラグは True だが、中身が None or 空なら再処理
     if (
         st.session_state.get("upload_files") and
