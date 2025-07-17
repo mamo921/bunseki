@@ -9,6 +9,17 @@ import json
 import re
 import bcrypt
 import matplotlib.font_manager as fm  # フォントマネージャーをインポート
+import os
+
+font_path = "static/NotoSansJP-Regular.otf"
+if os.path.exists(font_path):
+    font_prop = fm.FontProperties(fname=font_path)
+    japanese_font_available = True
+    st.info("日本語フォント 'NotoSansJP-Regular.otf' を使用します。")
+else:
+    st.warning("日本語フォントが見つかりませんでした。デフォルトフォントで描画します。")
+    font_prop = None
+    japanese_font_available = False
 
 # matplotlibのフォント設定
 plt.rcParams['axes.unicode_minus'] = False  # 負の記号が文字化けするのを防ぐ
