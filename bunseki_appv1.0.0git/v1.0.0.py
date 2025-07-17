@@ -18,27 +18,41 @@ def load_users_from_secrets():
 
 # ログインフォームを表示
 def login_form():
-    st.title("ログイン")
+    st.subheader("ログイン")
+
+    # 🔐 secrets からユーザー情報読み取り
+    user_data = []
+    for key, value in st.secrets["users"].items():
+        # value は辞書 or JSON文字列 の場合があるので対応
+        if isinstance(value, str):
+            import json
+            value = json.loads(value)
+        user_data.append({
+            "username": value["username"],
+            "password_hash": value["password_hash"]
+        })
 
     # フォーム定義
     with st.form("login_form"):
         username_input = st.text_input("ユーザー名")
         password_input = st.text_input("パスワード", type="password")
         submitted = st.form_submit_button("ログイン")
-    
-    # フォームの外で判定する
+
+    # フォーム外で処理（← rerun するためにここでやる）
     if submitted:
         for user in user_data:
             if username_input == user["username"]:
                 if verify_password(password_input, user["password_hash"]):
                     st.session_state["logged_in"] = True
                     st.session_state["username"] = user["username"]
-                    st.experimental_rerun()  # ← ここは form の外だからOK！
+                    st.success("ログイン成功！")
+                    st.experimental_rerun()
                 else:
                     st.error("パスワードが違います。")
                 break
         else:
             st.error("ユーザーが見つかりません。")
+
 
 
 # ログイン済みダッシュボード
