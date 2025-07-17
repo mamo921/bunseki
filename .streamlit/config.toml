@@ -1,0 +1,12 @@
+[server]
+enableStaticServing = true
+
+[[theme.fontFaces]]
+family = "noto-sans-jp"
+url = "app/static/NotoSansJP-Regular.woff2"
+weight = 400
+
+[theme]
+font = "noto-sans-jp"
+headingFont = "noto-sans-jp"
+codeFont = "monospace"
