@@ -115,26 +115,15 @@ def load_users_from_secrets():
         # AttrDictはkeys()メソッドを持つため、直接ループしてアクセスします
         # isinstance(st.secrets.users, dict) のチェックは不要です
         for username_key in st.secrets.users.keys():
-            if username_key.startswith("user_"):
-                raw_value = st.secrets.users[username_key]
-
-                # secrets.toml内で文字列（JSON）として登録されている場合はデコードする
-                if isinstance(raw_value, str):
-                    try:
-                        user_info = json.loads(raw_value)
-                    except json.JSONDecodeError:
-                        st.error(f"{username_key} のJSONデコードに失敗しました")
-                        continue
-                else:
-                    user_info = raw_value  # すでに辞書形式の場合はそのまま使う
-
-                if 'username' in user_info and 'password_hash' in user_info:
+            if username_key.startswith("user_"): # ユーザー名であることを示すプレフィックス
+                user_info = st.secrets.users[username_key] # AttrDictから直接アクセス可能
+                if isinstance(user_info, dict) and 'username' in user_info and 'password_hash' in user_info:
                     users_data.append(user_info)
-                else:
-                    st.warning(f"{username_key} のデータ形式が不正です")
+                elif isinstance(user_info, str): # 旧形式のパスワードハッシュを直接格納している場合
+                    st.warning(f"secrets.tomlの'users.{username_key}'の形式が古い可能性があります。辞書形式を推奨します。")
+                    users_data.append({"username": username_key.replace("user_", ""), "password_hash": user_info})
             else:
-                st.warning(f"予期しないキー '{username_key}' が users にあります")
-
+                st.warning(f"secrets.tomlの'users'セクションに予期しないキー '{username_key}' が見つかりました。'user_'で始まるキーのみが処理されます。")
     
     # ユーザーが一人もロードされなかった場合の最終エラーチェック
     if not users_data:
@@ -159,43 +148,34 @@ def main():
 
     if not st.session_state.logged_in:
         st.sidebar.header("ログイン")
-        # 入力欄
-        st.sidebar.text_input("ユーザー名", key="input_username")
-        st.sidebar.text_input("パスワード", type="password", key="input_password")
-
-        # 入力取得（ログインボタンより前に）
-        username_input = st.session_state.get("input_username", "").strip().lower()
-        password_input = st.session_state.get("input_password", "")
+        username_input = st.sidebar.text_input("ユーザー名")
+        password_input = st.sidebar.text_input("パスワード", type="password")
 
         if st.sidebar.button("ログイン"):
+            # --- ここから追加 ---
             st.write("デバッグ: 入力されたユーザー名:", username_input)
-            st.write("デバッグ: 入力されたパスワード（ハッシュ化前）:", password_input)
+            st.write("デバッグ: 入力されたパスワード（ハッシュ化前）:", password_input) # !!! 注意: デバッグ後必ず削除 !!!
+            # --- ここまで追加 ---
 
-            if not username_input or not password_input:
-                st.sidebar.warning("ユーザー名とパスワードを入力してください。")
-            else:
-                users = load_users_from_secrets()
-                user_found = False
+            users = load_users_from_secrets() # secretsからユーザー情報をロード
+            user_found = False
+            for user in users:
+                # --- ここから追加 ---
+                st.write("デバッグ: secretsから取得したユーザー情報:", user['username'], user.get('password_hash', 'ハッシュなし')) # パスワードハッシュを直接表示しない
+                # --- ここまで追加 ---
 
-                for user in users:
-                    st.write("デバッグ: ユーザー名比較", "user側:", user['username'], "| 入力:", username_input)
-
-                    if user['username'] == username_input:
-                        user_found = True
-                        password_match = verify_password(password_input, user['password_hash'])
-                        st.write("デバッグ: パスワード一致した？", password_match)
-
-                        if password_match:
-                            st.session_state.logged_in = True
-                            st.session_state.username = username_input
-                            st.sidebar.success(f"ようこそ、{username_input}さん！")
-                            st.experimental_rerun()
-                        else:
-                            st.sidebar.error("パスワードが間違っています。")
-                        break
-
-                if not user_found:
-                    st.sidebar.error("ユーザー名が見つかりません。")
+                if user['username'] == username_input:
+                    user_found = True
+                    if verify_password(password_input, user['password_hash']):
+                        st.session_state.logged_in = True
+                        st.session_state.username = username_input
+                        st.sidebar.success(f"ようこそ、{username_input}さん！")
+                        st.experimental_rerun()
+                    else:
+                        st.sidebar.error("パスワードが間違っています。")
+                    break
+            if not user_found:
+                st.sidebar.error("ユーザー名が見つかりません。")
 
             st.info("ログインするとアプリケーションの機能が利用できます。")
             return
