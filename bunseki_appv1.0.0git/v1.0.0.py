@@ -10,26 +10,33 @@ import re
 import bcrypt
 import matplotlib.font_manager as fm # フォントマネージャーをインポート
 import os
+import ast
+
+dfmain = st.session_state.get("dfmain")
 
 dfmain = st.session_state.get("dfmain")
 
 if isinstance(dfmain, pd.DataFrame):
-    if isinstance(dfmain, pd.DataFrame) and "担当チーム" in dfmain.columns:
-        # すべての値を文字列として扱い、区切られている場合はリスト化して平坦化
-        team_series = dfmain["担当チーム"].dropna()
-
-        # 文字列で統一し、リストに変換 → 平坦化
-        team_list = team_series.astype(str).str.replace('　', ' ', regex=False).str.split(r'[・,/／　 ]+')
-        flat_team_list = [team.strip() for sublist in team_list for team in sublist if team.strip()]
-
-        st.write("dfmain 担当チーム一覧:", sorted(set(flat_team_list)))
-
     if "担当チーム" in dfmain.columns:
-        st.write("dfmain 担当チーム一覧:", dfmain["担当チーム"].unique())
+        team_col = dfmain["担当チーム"].dropna()
+
+        # "['初心者']" のような文字列を安全にリストに変換
+        def parse_team(val):
+            try:
+                parsed = ast.literal_eval(val) if isinstance(val, str) and val.startswith('[') else [val]
+                return [str(x).strip() for x in parsed]
+            except Exception:
+                return [str(val).strip()]
+
+        team_list = team_col.apply(parse_team)
+        flat_teams = [team for sublist in team_list for team in sublist if team]
+
+        st.write("dfmain 担当チーム一覧:", sorted(set(flat_teams)))
     else:
         st.warning("dfmain に『担当チーム』列が存在しません。")
 else:
     st.warning("dfmain が読み込まれていません。")
+
 
 
 # このファイルと同じ階層に static フォルダがある場合
