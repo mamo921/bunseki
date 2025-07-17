@@ -160,9 +160,18 @@ def main():
         password_input = st.sidebar.text_input("パスワード", type="password")
 
         if st.sidebar.button("ログイン"):
+            # --- ここから追加 ---
+            st.write("デバッグ: 入力されたユーザー名:", username_input)
+            st.write("デバッグ: 入力されたパスワード（ハッシュ化前）:", password_input) # !!! 注意: デバッグ後必ず削除 !!!
+            # --- ここまで追加 ---
+
             users = load_users_from_secrets() # secretsからユーザー情報をロード
             user_found = False
             for user in users:
+                # --- ここから追加 ---
+                st.write("デバッグ: secretsから取得したユーザー情報:", user['username'], user.get('password_hash', 'ハッシュなし')) # パスワードハッシュを直接表示しない
+                # --- ここまで追加 ---
+
                 if user['username'] == username_input:
                     user_found = True
                     if verify_password(password_input, user['password_hash']):
@@ -175,9 +184,9 @@ def main():
                     break
             if not user_found:
                 st.sidebar.error("ユーザー名が見つかりません。")
-        
-        st.info("ログインするとアプリケーションの機能が利用できます。")
-        return
+
+            st.info("ログインするとアプリケーションの機能が利用できます。")
+            return
 
     with st.sidebar:
         st.markdown(f"**ログイン中:** {st.session_state.username}")
