@@ -178,9 +178,9 @@ def main():
                 if user['username'] == username_input:
                     user_found = True
                     password_match = verify_password(password_input, user['password_hash'])
-
+                
                     st.write("デバッグ: パスワード一致した？", password_match)
-
+                
                     if password_match:
                         st.session_state.logged_in = True
                         st.session_state.username = username_input
@@ -189,6 +189,7 @@ def main():
                     else:
                         st.sidebar.error("パスワードが間違っています。")
                     break
+
 
 
                     break
