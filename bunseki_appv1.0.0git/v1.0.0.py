@@ -14,8 +14,8 @@ import matplotlib.font_manager as fm # フォントマネージャーをイン�
 font_path = "bunseki_appv1.0.0git/static/NotoSansJP-VariableFont_wght.otf"
 font_prop = fm.FontProperties(fname=font_path)
 
+font_prop = fm.FontProperties(fname=font_path)
 plt.rcParams['font.family'] = font_prop.get_name()
-plt.rcParams['font.sans-serif'] = [font_prop.get_name()]
 
 
 # matplotlibのフォント設定
