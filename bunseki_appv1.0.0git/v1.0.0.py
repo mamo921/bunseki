@@ -10,34 +10,6 @@ import re
 import bcrypt
 import matplotlib.font_manager as fm # フォントマネージャーをインポート
 import os
-import ast
-
-dfmain = st.session_state.get("dfmain")
-
-dfmain = st.session_state.get("dfmain")
-
-if isinstance(dfmain, pd.DataFrame):
-    if "担当チーム" in dfmain.columns:
-        team_col = dfmain["担当チーム"].dropna()
-
-        # "['初心者']" のような文字列を安全にリストに変換
-        def parse_team(val):
-            try:
-                parsed = ast.literal_eval(val) if isinstance(val, str) and val.startswith('[') else [val]
-                return [str(x).strip() for x in parsed]
-            except Exception:
-                return [str(val).strip()]
-
-        team_list = team_col.apply(parse_team)
-        flat_teams = [team for sublist in team_list for team in sublist if team]
-
-        st.write("dfmain 担当チーム一覧:", sorted(set(flat_teams)))
-    else:
-        st.warning("dfmain に『担当チーム』列が存在しません。")
-else:
-    st.warning("dfmain が読み込まれていません。")
-
-
 
 # このファイルと同じ階層に static フォルダがある場合
 font_path = os.path.join(os.path.dirname(__file__), "static", "NotoSansJP-VariableFont_wght.ttf")
@@ -253,44 +225,6 @@ def show_main_app():
 
     SessionManager.initialize()
 
-    df_current = st.session_state.get("current_data")
-    df_main = st.session_state.get("dfmain")
-
-    if "df_filtered" not in st.session_state or st.session_state["df_filtered"] is None or getattr(st.session_state["df_filtered"], "empty", True):
-        if df_current is not None and not df_current.empty:
-            st.session_state["df_filtered"] = df_current.copy()
-        elif df_main is not None and not df_main.empty:
-            st.session_state["df_filtered"] = df_main.copy()
-
-    # 🔧 df_filtered を常に current_data から再生成（空だったら dfmain から）
-    if "df_filtered" not in st.session_state or st.session_state["df_filtered"] is None or st.session_state["df_filtered"] is ... or getattr(st.session_state["df_filtered"], "empty", True):
-        df_candidate = st.session_state.get("current_data") or st.session_state.get("dfmain")
-        if df_candidate is not None and not df_candidate.empty:
-            st.session_state["df_filtered"] = df_candidate.copy()
-
-    # 🔧 df_filtered を完全に同期させておく
-    df_filtered = st.session_state.get("current_data")
-
-    # fallback（まだcurrent_dataがNoneならdfmainを使う）
-    if df_filtered is None or df_filtered.empty:
-        df_filtered = st.session_state.get("dfmain")
-
-    # 🔁 データが処理済みフラグは True だが、中身が None or 空なら再処理
-    if (
-        st.session_state.get("upload_files") and
-        st.session_state.get("uploaded_file_processed") and
-        (
-            st.session_state.get("dfmain") is None or
-            st.session_state["dfmain"].empty or
-            st.session_state.get("current_data") is None or
-            st.session_state["current_data"].empty
-        )
-    ):
-        st.session_state["uploaded_file_processed"] = False
-        st.rerun()
-
-    df_filtered = None  # ← 最初に定義しておく！（これが重要）
-
     with st.sidebar:
         st.markdown(get_localized_text("## 🔍 フィルター設定"))
         st.markdown("---")
@@ -300,65 +234,28 @@ def show_main_app():
         if dfmain_for_sidebar is not None and not dfmain_for_sidebar.empty:
             df_filtered = dfmain_for_sidebar.copy()
 
-            df = st.session_state.get("dfmain")
-            dfmain = st.session_state.get("dfmain")
-
-            if isinstance(dfmain, pd.DataFrame) and "担当チーム" in dfmain.columns:
-                # 文字列化・欠損除去
-                team_col = dfmain["担当チーム"].dropna().apply(lambda x: ','.join(x) if isinstance(x, list) else str(x))
-
-                st.write("dfmain 担当チーム一覧:", team_col.unique())
-            else:
-                st.warning("dfmain または 担当チーム列が存在しません。")
-
-
-            # 👥 担当チームフィルター
             if '担当チーム' in df_filtered.columns:
-                # 全角スペースや区切り記号を統一して分解
-                df["担当チーム"] = df["担当チーム"].astype(str).str.replace('　', ' ', regex=False)
-                df["担当チーム"] = df["担当チーム"].str.split(r'[・,/／　 ]+')
-                df = df.explode("担当チーム").reset_index(drop=True)
-                df["担当チーム"] = df["担当チーム"].str.strip()
-                def parse_team(val):
-                    try:
-                        parsed = ast.literal_eval(val) if isinstance(val, str) and val.startswith('[') else [val]
-                        return [str(x).strip() for x in parsed]
-                    except Exception:
-                        return [str(val).strip()]
-
-                # 全データからチーム名を抽出・平坦化
-                team_series = df_filtered["担当チーム"].dropna().apply(parse_team)
-                flat_team_list = [team for sublist in team_series for team in sublist if team]
-                teams = sorted(set(flat_team_list))
-
-                # 安全に取得（list じゃなかったら初期化）
-                previous_selection = st.session_state.get("selected_teams", [])
-                if not isinstance(previous_selection, list):
-                    previous_selection = []
-
-                # 選択肢にあるものだけ残す
-                valid_selection = [t for t in previous_selection if t in teams]
-
-                # 選択肢が全部消えていたら全選択で復旧
-                if not valid_selection:
-                    valid_selection = teams.copy()
-
-                # セッションに保存
-                st.session_state["selected_teams"] = valid_selection
-
-                # multiselect 表示
-                st.multiselect(
-                    get_localized_text("👥 担当チーム"),
-                    options=teams,
-                    default=valid_selection,
-                    key="selected_teams"
+                teams = sorted(df_filtered['担当チーム'].dropna().unique())
+                
+                # selected_teams の初期値をセッションステートから取得、なければ全選択
+                initial_selected_teams = st.session_state.get('selected_teams')
+                # selected_teams がNoneの場合、全チームを選択状態にする
+                if initial_selected_teams is None:
+                    initial_selected_teams = teams
+                
+                selected_teams = st.multiselect(
+                    get_localized_text("👥 担当チーム"), 
+                    teams, 
+                    default=[t for t in initial_selected_teams if t in teams] # 存在しないチームがdefaultに含まれないようにフィルタ
                 )
+                st.session_state.selected_teams = selected_teams # セッションステートに選択を保存
 
-                # 実際のフィルター適用
-                if st.session_state['selected_teams']:
-                    df_filtered = df_filtered[df_filtered['担当チーム'].isin(st.session_state['selected_teams'])]
-                else:
+                # 担当チームが何も選択されていない場合の動作変更
+                if len(selected_teams) == 0:
                     st.warning(get_localized_text("担当チームが選択されていません。全ての担当チームのデータが表示されます。"))
+                    # df_filtered はこのブロックに入る前の状態（dfmain_for_sidebar）のまま使用
+                else:
+                    df_filtered = df_filtered[df_filtered['担当チーム'].isin(selected_teams)]
 
             if '実施日' in df_filtered.columns:
                 # dt.dateに変換されているため、そのまま使用
@@ -450,15 +347,6 @@ def show_main_app():
                 st.session_state.previous_files_hash = current_files_hash
                 st.rerun()
 
-            # 🔽 アップロードされたファイルがあり、処理済みフラグがTrueでもdfmainがNoneなら再処理する
-            if (
-                st.session_state.upload_files and 
-                st.session_state.uploaded_file_processed and 
-                (st.session_state.dfmain is None or st.session_state.current_data is None)
-            ):
-                st.session_state.uploaded_file_processed = False
-                st.rerun()
-
             if st.session_state.upload_files and not st.session_state.uploaded_file_processed:
                 uploaded_dfs_temp = []
                 for f in st.session_state.upload_files:
@@ -469,14 +357,7 @@ def show_main_app():
                     else:
                         df_t = DataProcessor.process_dataframe(df_t)
                         if df_t is not None:
-                            # ✅ セッションに保存（最初のファイルのみでOK）
-                            if len(uploaded_dfs_temp) == 0:
-                                st.session_state["dfmain"] = df_t.copy()
-                                st.session_state["current_data"] = df_t.copy()
-                                st.session_state["df_filtered"] = df_t.copy()
-
                             uploaded_dfs_temp.append(df_t)
-
 
                 if uploaded_dfs_temp:
                     df_combined = pd.concat(uploaded_dfs_temp, ignore_index=True).drop_duplicates()
@@ -588,15 +469,7 @@ def show_main_app():
                 value_counts = df_display[selected_col].value_counts()
 
                 fig, ax = plt.subplots()
-                if df_filtered is not None and selected_col in df_filtered.columns:
-                    sns.countplot(
-                        x=selected_col,
-                        data=df_filtered,
-                        order=df_filtered[selected_col].value_counts().index,
-                        ax=ax
-                    )
-                else:
-                    st.warning("データが読み込まれていないか、指定された列が存在しません。")
+                sns.countplot(x=selected_col, data=df_filtered, order=df_filtered[selected_col].value_counts().index, ax=ax)
 
                 # 🔽 x軸のラベルタイトルに日本語フォントを適用（これがないと豆腐になる）
                 ax.set_xlabel(get_graph_text(str(selected_col)), fontproperties=font_prop)
