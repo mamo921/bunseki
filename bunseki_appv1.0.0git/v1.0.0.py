@@ -162,8 +162,6 @@ def main():
         username_input = st.sidebar.text_input("ユーザー名")
         password_input = st.sidebar.text_input("パスワード", type="password")
 
-        st.write("デバッグ: ユーザー名比較", "user側:", user['username'], "| 入力:", username_input)
-
         if st.sidebar.button("ログイン"):
             # --- ここから追加 ---
             st.write("デバッグ: 入力されたユーザー名:", username_input)
