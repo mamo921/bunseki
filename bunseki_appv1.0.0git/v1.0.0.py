@@ -269,6 +269,11 @@ def show_main_app():
         get_localized_text("📋 自動レポート", "📋 Automatic Report")
     ])
 
+    title_font = {
+        'fontsize': 14,
+        'fontweight': 'bold'
+    }
+
     with tabs[0]:
         st.header(get_localized_text("📁 分析対象CSVファイルのアップロード", "📁 Upload CSV File for Analysis"))
         
