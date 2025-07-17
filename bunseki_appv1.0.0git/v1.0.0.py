@@ -476,6 +476,11 @@ def show_main_app():
 
                 st.pyplot(fig)
 
+                # ここから追加：tickラベルに日本語フォントを適用
+                plt.draw()
+                for label in ax.get_xticklabels():
+                    label.set_fontproperties(font_prop)
+
                 # タイトル・軸ラベル
                 ax.set_title(get_graph_text(f"{selected_col}の値カウント", f"Value Counts of {selected_col}"), fontproperties=font_prop, **title_font)
                 ax.set_xlabel(get_graph_text(selected_col, selected_col), fontproperties=font_prop)
