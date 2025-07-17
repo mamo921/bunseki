@@ -10,6 +10,13 @@ import re
 import bcrypt
 import matplotlib.font_manager as fm # フォントマネージャーをインポート
 
+# 相対パスで指定（Streamlit Cloudでも通る）
+font_path = "bunseki_appv1.0.0git\static\NotoSansJP-Thin.woff2"
+font_prop = fm.FontProperties(fname=font_path)
+
+plt.rcParams['font.family'] = font_prop.get_name()
+
+
 # matplotlibのフォント設定
 # 負の記号が文字化けするのを防ぐ
 plt.rcParams['axes.unicode_minus'] = False
