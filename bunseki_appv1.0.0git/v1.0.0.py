@@ -319,7 +319,17 @@ def show_main_app():
                 df["担当チーム"] = df["担当チーム"].str.split(r'[・,/／　 ]+')
                 df = df.explode("担当チーム").reset_index(drop=True)
                 df["担当チーム"] = df["担当チーム"].str.strip()
-                teams = sorted(df_filtered['担当チーム'].dropna().unique().tolist())  # 必ず list 化！
+                def parse_team(val):
+                    try:
+                        parsed = ast.literal_eval(val) if isinstance(val, str) and val.startswith('[') else [val]
+                        return [str(x).strip() for x in parsed]
+                    except Exception:
+                        return [str(val).strip()]
+
+                # 全データからチーム名を抽出・平坦化
+                team_series = df_filtered["担当チーム"].dropna().apply(parse_team)
+                flat_team_list = [team for sublist in team_series for team in sublist if team]
+                teams = sorted(set(flat_team_list))
 
                 # 安全に取得（list じゃなかったら初期化）
                 previous_selection = st.session_state.get("selected_teams", [])
