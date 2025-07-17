@@ -479,6 +479,8 @@ def show_main_app():
 
                 # 念のため tight_layout
                 plt.tight_layout()
+                # ★ここでX軸タイトルをサンプルで強制上書き
+                ax.set_xlabel("テスト：あいうえおカウント", fontproperties=font_prop)
 
                 st.pyplot(fig)
 
