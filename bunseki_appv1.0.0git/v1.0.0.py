@@ -11,7 +11,7 @@ import bcrypt
 import matplotlib.font_manager as fm  # フォントマネージャーをインポート
 import os
 
-font_path = "static/NotoSansJP-Regular.otf"
+font_path = "bunseki_appv1.0.0git/static/NotoSansJP-VariableFont_wght.otf"
 if os.path.exists(font_path):
     font_prop = fm.FontProperties(fname=font_path)
     japanese_font_available = True
