@@ -6,3 +6,7 @@ font="sans serif"
 [[theme.fontFaces]]
 family = "Noto Sans JP"
 url = "static/NotoSansJP-Thin.woff2"
+
+[theme]
+base="light"
+font="Noto Sans JP"
