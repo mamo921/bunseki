@@ -489,7 +489,7 @@ def show_main_app():
 
                 # タイトル・軸ラベル
                 ax.set_title(get_graph_text(f"{selected_col}の値カウント"), fontproperties=font_prop, **title_font)
-                ax.set_xlabel(get_graph_text(selected_col), fontproperties=font_prop)
+                ax.set_xlabel(get_graph_text(str(selected_col)), fontproperties=font_prop)
                 ax.set_ylabel(get_graph_text("カウント"), fontproperties=font_prop)
 
                 # ✅ x軸のTickラベルを完全に再描画する
@@ -807,7 +807,7 @@ def show_main_app():
 
                     # Apply font_prop to title, labels, and ticks
                     ax.set_title(get_graph_text(f"時間帯×曜日の{heat_metric}（{agg_method_display}）"), fontproperties=font_prop, fontsize=16)
-                    ax.set_xlabel(get_graph_text("曜日"), fontproperties=font_prop, fontsize=12)
+                    ax.set_xlabel(get_graph_text(str("曜日")), fontproperties=font_prop, fontsize=12)
                     ax.set_ylabel(get_graph_text("時間帯スロット"), fontproperties=font_prop, fontsize=12)
                     ax.set_xticklabels(ax.get_xticklabels(), fontproperties=font_prop)
                     ax.set_yticklabels(ax.get_yticklabels(), fontproperties=font_prop)
@@ -1009,7 +1009,7 @@ def show_main_app():
                     ax.set_title(get_graph_text(
                         f"{trend_metric}の時系列 ({'全体' if trend_group == 'なし' else trend_group}別)"
                     ), fontproperties=font_prop, fontsize=16)
-                    ax.set_xlabel(get_graph_text("実施日"), fontproperties=font_prop, fontsize=12)
+                    ax.set_xlabel(get_graph_text(str("実施日")), fontproperties=font_prop, fontsize=12)
                     ax.set_ylabel(get_graph_text(f"{trend_metric} ({agg_period_display}平均)"), fontproperties=font_prop, fontsize=12)
                     ax.legend(prop=font_prop) # Use font_prop directly for legend
                     ax.set_xticklabels(ax.get_xticklabels(), fontproperties=font_prop)
@@ -1096,7 +1096,7 @@ def show_main_app():
                     rank_display[get_localized_text('平均値')].plot(kind='barh', ax=ax)
                     # Apply font_prop to title, labels, and ticks
                     ax.set_title(get_graph_text(f"{rank_group}別 {rank_metric}のランキング"), fontproperties=font_prop, fontsize=16)
-                    ax.set_xlabel(get_graph_text(f"{rank_metric} 平均値"), fontproperties=font_prop, fontsize=12)
+                    ax.set_xlabel(get_graph_text(str(f"{rank_metric} 平均値")), fontproperties=font_prop, fontsize=12)
                     ax.set_ylabel(get_graph_text(rank_group), fontproperties=font_prop, fontsize=12) # Group name is data, keep as is
                     ax.set_xticklabels(ax.get_xticklabels(), fontproperties=font_prop)
                     ax.set_yticklabels(ax.get_yticklabels(), fontproperties=font_prop)
