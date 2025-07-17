@@ -108,9 +108,9 @@ class DataProcessor:
 def load_users_from_secrets():
     raw_users = st.secrets["users"]
     users = []
-    for key, user_data in raw_users.items():
-        # user_data はすでに辞書なのでそのまま追加！
-        users.append(user_data)
+    for key, user in raw_users.items():
+        # ここで user は dict {"username": ..., "password_hash": ...}
+        users.append(user)
     return users
 
 # パスワードをハッシュ化する関数
