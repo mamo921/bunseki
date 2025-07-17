@@ -218,7 +218,6 @@ def show_main_app():
     with st.sidebar:
         st.markdown(get_localized_text("## 🔍 フィルター設定", "## 🔍 Filter Settings"))
         st.markdown("---")
-        st.write(df_filtered[selected_col].unique())
 
         dfmain_for_sidebar = st.session_state.get('dfmain')
 
@@ -595,6 +594,11 @@ def show_main_app():
                             if col_name_for_plot in grouped_df.columns:
                                 with cols[i % 2]:
                                     fig, ax = plt.subplots(figsize=(8, 4))
+                                    # 🔽 これを追加（x軸のラベルに日本語フォントを適用）
+                                    plt.draw()
+                                    for label in ax.get_xticklabels():
+                                        label.set_fontproperties(font_prop)
+
                                     grouped_df[col_name_for_plot].plot(kind='bar', ax=ax)
                                     # Apply font_prop to title, labels, and ticks
                                     ax.set_ylabel(get_graph_text(f"{target_num}の{metric_display_name}", f"{metric_display_name} of {target_num}"), fontproperties=font_prop)
