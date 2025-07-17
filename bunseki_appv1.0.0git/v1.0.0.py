@@ -13,8 +13,6 @@ import os
 
 dfmain = st.session_state.get("dfmain")
 
-df = st.session_state.get("dfmain")
-
 if isinstance(dfmain, pd.DataFrame):
     if "担当チーム" in dfmain.columns:
         st.write("dfmain 担当チーム一覧:", dfmain["担当チーム"].unique())
@@ -284,6 +282,8 @@ def show_main_app():
 
         if dfmain_for_sidebar is not None and not dfmain_for_sidebar.empty:
             df_filtered = dfmain_for_sidebar.copy()
+
+            df = st.session_state.get("dfmain")
 
             # 👥 担当チームフィルター
             if '担当チーム' in df_filtered.columns:
