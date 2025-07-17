@@ -225,6 +225,12 @@ def show_main_app():
 
     SessionManager.initialize()
 
+    # 🔧 df_filtered を常に current_data から再生成（空だったら dfmain から）
+    if "df_filtered" not in st.session_state or st.session_state["df_filtered"] is None or st.session_state["df_filtered"] is ... or getattr(st.session_state["df_filtered"], "empty", True):
+        df_candidate = st.session_state.get("current_data") or st.session_state.get("dfmain")
+        if df_candidate is not None and not df_candidate.empty:
+            st.session_state["df_filtered"] = df_candidate.copy()
+
     # 🔧 df_filtered を完全に同期させておく
     df_filtered = st.session_state.get("current_data")
 
