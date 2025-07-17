@@ -217,7 +217,7 @@ def show_main_app():
         else:
             st.info("データをアップロードしてください")
 
-    tabs = st.tabs(["📊 データ管理", "📈 分析・比較", "📊 クロス集計", "🕒 ヒートマップ", "📉 時系列", "🏆 ランキング", "📋 自動レポート"])
+    tabs = st.tabs(["📊 データ管理", "📈 分析・比較", "📊 クロス集計", "� ヒートマップ", "📉 時系列", "🏆 ランキング", "📋 自動レポート"])
 
     with tabs[0]:
         st.header("📁 分析対象CSVファイルのアップロード")
@@ -1079,8 +1079,9 @@ def main():
     # Streamlitのページ設定は一度だけ行う
     st.set_page_config(page_title="VRイベント分析ツール", layout="wide")
 
-    # アプリケーション起動時に常にログアウト状態にする
-    st.session_state["logged_in"] = False
+    # セッションステートにlogged_inがなければ初期化（アプリケーション起動時にのみFalseに設定）
+    if "logged_in" not in st.session_state:
+        st.session_state["logged_in"] = False
 
     if st.session_state.get("logged_in"):
         # ログイン済みの場合、ユーザー名を表示し、ログアウトボタンとメインアプリを表示
