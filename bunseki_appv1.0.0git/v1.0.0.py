@@ -284,6 +284,7 @@ def show_main_app():
             df_filtered = dfmain_for_sidebar.copy()
 
             df = st.session_state.get("dfmain")
+            team_col = dfmain["担当チーム"].dropna().apply(lambda x: ','.join(x) if isinstance(x, list) else str(x))
 
             # 👥 担当チームフィルター
             if '担当チーム' in df_filtered.columns:
