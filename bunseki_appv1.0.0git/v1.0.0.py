@@ -469,7 +469,8 @@ def show_main_app():
                 value_counts = df_display[selected_col].value_counts()
 
                 fig, ax = plt.subplots()
-                sns.countplot(x=selected_col, data=df_filtered, order=df_filtered[selected_col].value_counts().index, ax=ax)
+                # `data=df_filtered` を `data=df_display` に変更
+                sns.countplot(x=selected_col, data=df_display, order=df_display[selected_col].value_counts().index, ax=ax)
 
                 # 🔽 x軸のラベルタイトルに日本語フォントを適用（これがないと豆腐になる）
                 ax.set_xlabel(get_graph_text(str(selected_col)), fontproperties=font_prop)
@@ -514,7 +515,7 @@ def show_main_app():
                 plt.xticks(rotation=45)
                 plt.tight_layout()
                 st.pyplot(fig)
-
+                
     with tabs[1]:
         st.header(get_localized_text("📈 分析・比較"))
         
