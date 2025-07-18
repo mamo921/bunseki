@@ -469,8 +469,7 @@ def show_main_app():
                 value_counts = df_display[selected_col].value_counts()
 
                 fig, ax = plt.subplots()
-                # `data=df_filtered` を `data=df_display` に変更
-                sns.countplot(x=selected_col, data=df_display, order=df_display[selected_col].value_counts().index, ax=ax)
+                sns.countplot(x=selected_col, data=df_filtered, order=df_filtered[selected_col].value_counts().index, ax=ax)
 
                 # 🔽 x軸のラベルタイトルに日本語フォントを適用（これがないと豆腐になる）
                 ax.set_xlabel(get_graph_text(str(selected_col)), fontproperties=font_prop)
@@ -515,7 +514,7 @@ def show_main_app():
                 plt.xticks(rotation=45)
                 plt.tight_layout()
                 st.pyplot(fig)
-                
+
     with tabs[1]:
         st.header(get_localized_text("📈 分析・比較"))
         
@@ -882,7 +881,7 @@ def show_main_app():
             if '実施日' not in df.columns:
                 st.warning(get_localized_text("時系列分析には「実施日」の列が必要です。"))
                 st.stop()
-            
+                
             # 実施日がPythonのdateオブジェクトになっているため、そのままdropna
             df = df.dropna(subset=['実施日'])
 
@@ -944,16 +943,16 @@ def show_main_app():
                     resampled = trend_df.set_index('実施日_timestamp')[trend_metric].resample(period_map_internal[agg_period_display]).mean()
                     
                     if not resampled.empty:
-                        resampled.plot(ax=ax, label=get_graph_text(f'{agg_period_display}平均'), fontproperties=font_prop)
+                        resampled.plot(ax=ax, label=get_graph_text(f'{agg_period_display}平均')) # fontpropertiesを削除
                         moving = resampled.rolling(window=moving_avg, min_periods=1).mean() 
                         if not moving.empty:
-                            moving.plot(ax=ax, label=get_graph_text(f'{moving_avg}{agg_period_display[0]}移動平均'), style='--', fontproperties=font_prop) 
+                            moving.plot(ax=ax, label=get_graph_text(f'{moving_avg}{agg_period_display[0]}移動平均'), style='--') # fontpropertiesを削除
                         else:
                             st.info(get_localized_text("移動平均を計算する十分なデータがありません。"))
                         has_data_to_plot = True
                     else:
                         st.warning(get_localized_text("集計データが空のため、時系列グラフを生成できませんでした。"))
-                    
+                        
                     if not resampled.empty:
                         st.subheader(get_localized_text("📊 時系列の特徴"))
                         latest_val = resampled.iloc[-1]
@@ -988,10 +987,10 @@ def show_main_app():
                                     if not group_data.empty:
                                         resampled = group_data.set_index('実施日_timestamp')[trend_metric].resample(period_map_internal[agg_period_display]).mean()
                                         if not resampled.empty:
-                                            resampled.plot(ax=ax, label=str(group), fontproperties=font_prop) # Group name is data, keep as is
+                                            resampled.plot(ax=ax, label=str(group)) # fontpropertiesを削除
                                             moving = resampled.rolling(window=moving_avg, min_periods=1).mean()
                                             if not moving.empty:
-                                                moving.plot(ax=ax, label=get_graph_text(f'{str(group)} ({moving_avg}{agg_period_display[0]}移動平均)'), style='--', fontproperties=font_prop) 
+                                                moving.plot(ax=ax, label=get_graph_text(f'{str(group)} ({moving_avg}{agg_period_display[0]}移動平均)'), style='--') # fontpropertiesを削除
                                             else:
                                                 st.info(get_localized_text(f"グループ '{group}' の移動平均を計算する十分なデータがありません。"))
                                             has_data_to_plot = True
@@ -999,7 +998,7 @@ def show_main_app():
                                             st.warning(get_localized_text(f"グループ '{group}' のデータが不足しているため、時系列グラフを生成できませんでした。"))
                                     else:
                                         st.warning(get_localized_text(f"グループ '{group}' のデータがありません。"))
-                            
+                                
                             if not has_data_to_plot:
                                 st.warning(get_localized_text("選択されたグループのいずれも時系列データをプロットできませんでした。"))
                         else:
